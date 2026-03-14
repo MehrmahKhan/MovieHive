@@ -1,0 +1,31 @@
+.app-container {
+  text-align: center;
+  margin-top: 50px;
+  background: linear-gradient(to right, #ffecd2, #fcb69f);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  color: #2c3e50;
+}
+
+p {
+  color: #34495e;
+  font-size: 18px;
+}
+
+h2 {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.profile-pic {
+  border-radius: 50%;
+  margin: 20px 0;
+  width: 150px;
+  height: 150px;
+  border: 4px solid #2c3e50;
+}

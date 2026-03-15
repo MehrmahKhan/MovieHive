@@ -1,15 +1,32 @@
+// server.js
 const express = require('express');
-const cors = require('cors');
+const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
+const PORT = 3000;
 
-app.use(cors());
+// Middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'client')));
 
-// Route that sends a personalized message
+// Routes
 app.get('/', (req, res) => {
-    res.send('Hello Mehrmah, welcome to my project! This backend is connected to React.');
+    res.sendFile(path.join(__dirname, 'client', 'login.html'));
 });
 
-app.listen(2000, () => {
-    console.log('Server running on http://localhost:2000');
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    // Simple login check
+    if(email === "admin@example.com" && password === "1234"){
+        res.send("Login successful! Welcome to MovieHive.");
+    } else {
+        res.send("Invalid email or password.");
+    }
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
 });

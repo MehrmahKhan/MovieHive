@@ -7,7 +7,9 @@ function Login({ setLoggedIn }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    setLoggedIn(true);
+    if (typeof setLoggedIn === "function") {
+      setLoggedIn(true);
+    }
   };
 
   return (

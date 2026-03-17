@@ -1,0 +1,100 @@
+/* Page background */
+.dashboard-page{
+    font-family:'Poppins', sans-serif;
+    padding:200px;
+    min-height:70vh;
+
+    background:
+    linear-gradient(rgba(20,10,40,0.45), rgba(10,5,25,0.55)),
+    url("https://images.unsplash.com/photo-1504461925567-8c1a26938d9b");
+
+    background-size:cover;
+    background-position:center;
+}
+
+/* Header */
+.dashboard-header{
+    display:flex;
+    align-items:center;
+    margin-bottom:80px;
+
+    background:rgba(207, 164, 164, 0.15);
+    backdrop-filter: blur(10px);
+
+    padding:120px;
+    border-radius:50px;
+
+    box-shadow:0 10px 30px rgba(224, 152, 152, 0.5);
+    color:rgb(248, 246, 246);
+}
+
+/* Welcome text */
+.user-info p{
+    font-weight:bold;
+    font-size:10px;
+}
+
+/* Movie grid */
+.movies-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+    gap:15px;
+}
+
+/* Movie cards */
+.movie-card{
+    background:rgba(125, 58, 58, 0.15);
+    backdrop-filter: blur(20px);
+
+    border-radius:30px;
+    padding:12px;
+
+    text-align:center;
+    color:rgb(80, 174, 130);
+
+    box-shadow:0 10px 25px rgba(209, 188, 188, 0.4);
+
+    transition:0.35s;
+    cursor:pointer;
+}
+
+/* Hover effect */
+.movie-card:hover{
+    transform:translateY(-8px) scale(1.03);
+    box-shadow:0 15px 35px rgba(0,0,0,0.6);
+}
+
+/* Poster */
+.movie-poster{
+    width:100%;
+    height:260px;
+
+    background:url('https://via.placeholder.com/200x260') no-repeat center/cover;
+
+    border-radius:12px;
+    margin-bottom:10px;
+
+    transition:0.3s;
+}
+
+/* Poster hover zoom */
+.movie-card:hover .movie-poster{
+    transform:scale(1.05);
+}
+
+/* Movie title */
+.movie-card h3{
+    margin:8px 0 4px 0;
+
+    background:linear-gradient(45deg,#ffb347,#ff5f6d,#8a2be2);
+    -webkit-background-clip:text;
+    color:transparent;
+
+    font-size:18px;
+}
+
+/* Movie year or info */
+.movie-card p{
+    font-size:14px;
+    opacity:0.85;
+}

@@ -1,60 +1,35 @@
-import React, { useState } from "react";
-import "./Login.css";
+import React,{useState} from 'react';
+import './Login.css';
 
-function Login({ setLoggedIn }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function Login({onLogin,switchSignup}){
+    const [email,setEmail] = useState('');
+    const [password,setPassword] = useState('');
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (typeof setLoggedIn === "function") {
-      setLoggedIn(true);
+    const handleLogin = async (e)=>{
+        e.preventDefault();
+        try{
+            const res = await fetch('http://localhost:3001/api/auth/login',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({email,password})
+            });
+            const data = await res.json();
+            if(res.ok) onLogin(data.user);
+            else alert(data.msg);
+        }catch(err){
+            alert('Server error');
+        }
     }
-  };
 
-  return (
-    <div className="login-page">
-
-      <div className="background-grid">
-        <img src="https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg" alt="" />
-        <img src="https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg" alt="" />
-        <img src="https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg" alt="" />
-        <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="" />
-        <img src="https://image.tmdb.org/t/p/w500/5weKu49pzJCt06OPpjvT80efnQj.jpg" alt="" />
-        <img src="https://image.tmdb.org/t/p/w500/fZPSd91yGE9fCcCe6OoQr6E3Bev.jpg" alt="" />
-      </div>
-
-      <div className="dark-overlay"></div>
-
-      <div className="login-card">
-
-        <h1 className="logo">MovieHive 🎬</h1>
-        <p className="subtitle">Your personal movie universe</p>
-
-        <form onSubmit={handleLogin}>
-
-          <input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e)=>setEmail(e.target.value)}
-          />
-
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e)=>setPassword(e.target.value)}
-          />
-
-          <button type="submit">Enter MovieHive</button>
-
-        </form>
-
-      </div>
-
-    </div>
-  );
+    return (
+        <div className="login-container">
+            <form className="login-form" onSubmit={handleLogin}>
+                <h2>Login</h2>
+                <input type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} required />
+                <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} required />
+                <button type="submit">Login</button>
+                <p>Don't have account? <span className="link" onClick={switchSignup}>Sign Up</span></p>
+            </form>
+        </div>
+    )
 }
-
-export default Login;

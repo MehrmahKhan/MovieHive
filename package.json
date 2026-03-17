@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "concurrently \"npm start\" \"cd client && npm start\"",
+    "start": "node backend/server.js",
+    "dev": "concurrently \"node backend/server.js\" \"cd client && set PORT=3002 && npm start\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "mssql": "^12.2.0",
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
     "express": "^5.2.1",

@@ -3,18 +3,29 @@ const express = require('express');
 const cors = require('cors');
 const sql = require('mssql');
 const authRoutes = require('./controllers/authController');
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+let dbConnected = false;
+
+const rawServer = process.env.DB_SERVER || 'localhost\\SQLEXPRESS';
+const serverParts = rawServer.split('\\').filter(Boolean);
+const dbHost = serverParts[0];
+const dbInstance = serverParts[1];
+const dbPort = process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined;
 
 // SQL Server config
 const dbConfig = {
-    user: 'Test1',
-    password: '123123',
-    server: 'DESKTOP-90E7HB0\\SQLEXPRESS',
-    database: 'MovieHive',
+    user: process.env.DB_USER || 'sa',
+    password: process.env.DB_PASSWORD || '',
+    server: dbHost,
+    port: dbPort,
+    database: process.env.DB_NAME || 'MovieDB',
     options: {
+        instanceName: dbPort ? undefined : dbInstance,
         encrypt: true,
         trustServerCertificate: true
     }
@@ -22,11 +33,26 @@ const dbConfig = {
 
 // Connect to DB
 sql.connect(dbConfig)
-    .then(() => console.log("✅ Connected to MovieHive DB"))
-    .catch(err => console.log(err));
+    .then(() => {
+        dbConnected = true;
+        console.log("✅ Connected to MovieDB");
+    })
+    .catch(err => {
+        dbConnected = false;
+        console.log('DB connection failed:', err.message);
+    });
 
 // Use auth routes
 app.use("/api/auth", authRoutes);
 
+app.get('/', (_req, res) => {
+    res.send('MovieHive backend is running. Use /api/health for status.');
+});
+
+app.get('/api/health', (_req, res) => {
+    res.json({ ok: true, api: 'MovieHive backend', dbConnected });
+});
+
 // Start server
-app.listen(3001, () => console.log("🚀 Server running on port 3001"));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

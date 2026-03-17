@@ -1,11 +1,11 @@
-/* Background */
+/* Page background */
 body{
     margin:0;
     font-family:'Poppins', sans-serif;
     height:100vh;
 
     background:
-   
+    linear-gradient(rgba(20,10,40,0.45), rgba(10,5,25,0.55)),
     url("https://images.unsplash.com/photo-1478720568477-152d9b164e26");
 
     background-size:cover;
@@ -17,27 +17,26 @@ body{
 }
 
 /* Container */
-.login-container{
+.signup-container{
     width:100%;
     max-width:420px;
 }
 
 /* Card */
-.login-form{
-    background:rgba(255,255,255,0.08);
-    backdrop-filter: blur(14px);
+.signup-form{
+    background:rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
     padding:40px;
     border-radius:20px;
-    box-shadow:0 25px 60px rgba(0,0,0,0.7);
+    box-shadow:0 20px 50px rgba(0,0,0,0.5);
     text-align:center;
     color:white;
 }
 
 /* Title */
-.login-form h2{
-    font-size:32px;
+.signup-form h2{
+    font-size:30px;
     margin-bottom:25px;
-    letter-spacing:1px;
 
     background:linear-gradient(45deg,#ffb347,#ff5f6d,#8a2be2);
     -webkit-background-clip:text;
@@ -45,27 +44,25 @@ body{
 }
 
 /* Inputs */
-.login-form input{
+.signup-form input{
     width:100%;
     padding:14px;
     margin:12px 0;
     border-radius:10px;
     border:none;
-    background:rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.2);
     color:white;
     font-size:15px;
     outline:none;
-    transition:0.3s;
 }
 
 /* Input focus */
-.login-form input:focus{
-    background:rgba(255,255,255,0.2);
-    box-shadow:0 0 12px rgba(255,179,71,0.5);
+.signup-form input:focus{
+    box-shadow:0 0 10px rgba(255,179,71,0.6);
 }
 
 /* Button */
-.login-form button{
+.signup-form button{
     width:100%;
     padding:14px;
     margin-top:18px;
@@ -78,26 +75,18 @@ body{
     font-weight:bold;
     color:white;
     cursor:pointer;
-
     transition:0.3s;
 }
 
 /* Button hover */
-.login-form button:hover{
-    transform:translateY(-2px) scale(1.03);
-    box-shadow:0 12px 25px rgba(0,0,0,0.5);
+.signup-form button:hover{
+    transform:scale(1.03);
+    box-shadow:0 10px 25px rgba(0,0,0,0.4);
 }
 
-/* Links */
+/* Link */
 .link{
-    display:inline-block;
     margin-top:15px;
-    font-size:14px;
     color:#ffd89b;
     cursor:pointer;
-    transition:0.3s;
-}
-
-.link:hover{
-    color:white;
 }

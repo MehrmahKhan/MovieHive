@@ -35,7 +35,7 @@ const dbConfig = {
 sql.connect(dbConfig)
     .then(() => {
         dbConnected = true;
-        console.log("✅ Connected to MovieDB");
+        console.log("Connected to MovieDB");
     })
     .catch(err => {
         dbConnected = false;
@@ -55,4 +55,4 @@ app.get('/api/health', (_req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

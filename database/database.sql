@@ -1,10 +1,16 @@
--- Create database
-CREATE DATABASE MovieHive;
+-- MovieHive Database Schema (SQL Server)
+-- Official schema for movie discovery and review platform
+
+CREATE DATABASE MovieDB;
 GO
-USE MovieHive;
+USE MovieDB;
 GO
 
--- Users table
+-- ============================================
+-- TABLES
+-- ============================================
+
+-- Users Table: Stores user account information
 CREATE TABLE Users (
     user_id INT PRIMARY KEY IDENTITY(1,1),
     name VARCHAR(100) NOT NULL,
@@ -14,72 +20,72 @@ CREATE TABLE Users (
     created_at DATETIME DEFAULT GETDATE()
 );
 
--- Movies table
+-- Movies Table: Stores movie information
 CREATE TABLE Movies (
     movie_id INT PRIMARY KEY IDENTITY(1,1),
     title VARCHAR(200) NOT NULL,
     description VARCHAR(1000),
-    release_year INT NOT NULL CHECK (release_year >= 1888),
-    duration_minutes INT NOT NULL CHECK (duration_minutes > 0),
+    release_year INT CHECK (release_year >= 1888),
+    duration_minutes INT CHECK (duration_minutes > 0),
     created_at DATETIME DEFAULT GETDATE()
 );
 
--- Genres
+-- Genres Table: Stores movie genre categories
 CREATE TABLE Genres (
     genre_id INT PRIMARY KEY IDENTITY(1,1),
     genre_name VARCHAR(100) NOT NULL UNIQUE
 );
 
--- Movie_Genres
+-- Movie_Genres: Bridging table for many-to-many relationship between Movies and Genres
 CREATE TABLE Movie_Genres (
-    movie_id INT NOT NULL,
-    genre_id INT NOT NULL,
+    movie_id INT,
+    genre_id INT,
     PRIMARY KEY (movie_id, genre_id),
     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE,
     FOREIGN KEY (genre_id) REFERENCES Genres(genre_id) ON DELETE CASCADE
 );
 
--- Persons
-CREATE TABLE Persons(
+-- Persons Table: Stores cast and crew information
+CREATE TABLE Persons (
     person_id INT PRIMARY KEY IDENTITY(1,1),
     full_name VARCHAR(150) NOT NULL,
     birth_date DATE
 );
 
--- Movie_Cast
+-- Movie_Cast: Bridging table for many-to-many relationship between Movies and Persons (cast/crew)
 CREATE TABLE Movie_Cast (
-    movie_id INT NOT NULL,
-    person_id INT NOT NULL,
+    movie_id INT,
+    person_id INT,
     role_name VARCHAR(50) NOT NULL,
     PRIMARY KEY (movie_id, person_id),
     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE,
     FOREIGN KEY (person_id) REFERENCES Persons(person_id) ON DELETE CASCADE
 );
 
--- Reviews
+-- Reviews Table: Stores user reviews and ratings for movies
 CREATE TABLE Reviews (
     review_id INT PRIMARY KEY IDENTITY(1,1),
     user_id INT NOT NULL,
     movie_id INT NOT NULL,
-    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    rating INT CHECK (rating BETWEEN 1 AND 5),
     review_text VARCHAR(1000),
     review_date DATETIME DEFAULT GETDATE(),
-    CONSTRAINT UQ_User_Movie UNIQUE (user_id, movie_id),
+    UNIQUE (user_id, movie_id),
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE
 );
 
--- Watchlist
+-- Watchlist Table: Stores movies that users want to watch
 CREATE TABLE Watchlist (
-    user_id INT NOT NULL,
-    movie_id INT NOT NULL,
+    user_id INT,
+    movie_id INT,
     added_at DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (user_id, movie_id),
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE
 );
 
--- Collections
+-- Collections Table: Stores user-created movie collections
 CREATE TABLE Collections (
     collection_id INT PRIMARY KEY IDENTITY(1,1),
     user_id INT NOT NULL,
@@ -88,30 +94,11 @@ CREATE TABLE Collections (
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 
--- Collection_Movies
+-- Collection_Movies: Bridging table for many-to-many relationship between Collections and Movies
 CREATE TABLE Collection_Movies (
-    collection_id INT NOT NULL,
-    movie_id INT NOT NULL,
+    collection_id INT,
+    movie_id INT,
     PRIMARY KEY (collection_id, movie_id),
     FOREIGN KEY (collection_id) REFERENCES Collections(collection_id) ON DELETE CASCADE,
     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE
 );
-
--- Sample Users (plain passwords for testing)
-INSERT INTO Users (name, email, password_hash, role)
-VALUES 
-('Admin', 'admin@moviehive.com', 'admin123', 'admin'),
-('User', 'user@moviehive.com', 'user123', 'user');
-
--- Sample Movies
-INSERT INTO Movies (title, description, release_year, duration_minutes)
-VALUES 
-('Inception', 'A mind-bending thriller', 2010, 148),
-('The Dark Knight', 'Batman faces Joker', 2008, 152),
-('Interstellar', 'Space exploration adventure', 2014, 169);
-
--- Sample Genres
-INSERT INTO Genres (genre_name) VALUES ('Action'), ('Sci-Fi'), ('Thriller');
-
--- Assign genres to movies
-INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (1,2), (1,3), (2,1), (2,3), (3,2);

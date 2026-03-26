@@ -12,7 +12,7 @@ const dbConfig = {
 const connectDB = async () => {
     try {
         await sql.connect(dbConfig);
-        console.log('✅ Connected to MovieHive DB');
+        console.log('Connected to MovieHive DB');
     } catch (err) {
         console.error('DB Connection Error:', err);
     }

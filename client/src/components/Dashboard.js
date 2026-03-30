@@ -13,36 +13,37 @@ export default function Dashboard({user}) {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+        <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
             {/* Navbar */}
-            <nav className="bg-slate-950/60 backdrop-blur-sm border-b border-slate-800/50 sticky top-0 z-50">
+            <nav className="sticky top-0 z-50 backdrop-blur-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.7)', borderBottomColor: '#3b3c45', borderBottomWidth: '1px'}}>
                 <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
                     <h1 className="text-2xl font-light tracking-tight">MovieHive</h1>
 
                     <div className="flex items-center gap-8">
-                        <div className="hidden md:flex gap-8 text-sm font-light text-slate-300">
-                            <a href="#" className="hover:text-white transition">Discover</a>
-                            <a href="#" className="hover:text-white transition">Trending</a>
-                            <a href="#" className="hover:text-white transition">My Watchlist</a>
+                        <div className="hidden md:flex gap-8 text-sm font-light" style={{color: '#c7c7cc'}}>
+                            <button className="transition hover:text-white">Discover</button>
+                            <button className="transition hover:text-white">Trending</button>
+                            <button className="transition hover:text-white">My Watchlist</button>
                         </div>
 
                         <div className="relative">
                             <button
                                 onClick={() => setShowUserMenu(!showUserMenu)}
-                                className="w-10 h-10 rounded-full bg-teal-600/20 border border-teal-600/50 text-white font-medium text-sm hover:bg-teal-600/30 transition flex items-center justify-center"
+                                className="w-10 h-10 rounded-full font-medium text-sm transition flex items-center justify-center"
+                                style={{backgroundColor: 'rgba(244, 211, 32, 0.1)', borderColor: '#f4d320', borderWidth: '1px', color: '#f4d320'}}
                             >
                                 {user?.name?.charAt(0).toUpperCase() || 'U'}
                             </button>
 
                             {showUserMenu && (
-                                <div className="absolute right-0 mt-3 w-48 bg-slate-900 border border-slate-700 rounded-sm shadow-xl overflow-hidden">
-                                    <div className="px-4 py-3 border-b border-slate-700">
-                                        <p className="font-light text-sm text-white">{user?.name || 'User'}</p>
-                                        <p className="text-xs text-slate-400">{user?.email || 'email@example.com'}</p>
+                                <div className="absolute right-0 mt-3 w-48 rounded-sm shadow-xl overflow-hidden" style={{backgroundColor: '#1d1f2b', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                                    <div className="px-4 py-3" style={{borderBottomColor: '#3b3c45', borderBottomWidth: '1px'}}>
+                                        <p className="font-light text-sm" style={{color: '#f4f4f4'}}>{user?.name || 'User'}</p>
+                                        <p className="text-xs" style={{color: '#afafba'}}>{user?.email || 'email@example.com'}</p>
                                     </div>
-                                    <a href="#" className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 transition font-light">Profile</a>
-                                    <a href="#" className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 transition font-light">Settings</a>
-                                    <button className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 transition border-t border-slate-700 font-light">Sign Out</button>
+                                    <button className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Profile</button>
+                                    <button className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Settings</button>
+                                    <button className="w-full text-left px-4 py-2 text-sm transition border-t font-light" style={{color: '#c7c7cc', borderTopColor: '#3b3c45'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Sign Out</button>
                                 </div>
                             )}
                         </div>
@@ -53,35 +54,35 @@ export default function Dashboard({user}) {
             {/* Hero Section */}
             <section className="max-w-7xl mx-auto px-8 py-16">
                 <div>
-                    <h2 className="text-5xl font-light leading-tight mb-4 tracking-tight">MovieHive</h2>
-                    <p className="text-slate-400 font-light">Explore our collection of movies</p>
+                    <h2 className="text-5xl font-light leading-tight mb-4 tracking-tight" style={{color: '#f4d320'}}>MovieHive</h2>
+                    <p className="font-light" style={{color: '#afafba'}}>Explore our collection of movies</p>
                 </div>
             </section>
 
             {/* Movie Catalogue */}
-            <section className="max-w-7xl mx-auto px-8 py-12 border-t border-slate-800/50">
-                <h3 className="text-2xl font-light mb-8 tracking-tight">Movie Catalogue</h3>
+            <section className="max-w-7xl mx-auto px-8 py-12" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
+                <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Movie Catalogue</h3>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {movies.map((movie) => (
-                        <div key={movie.movie_id} className="border border-slate-800/50 rounded-sm bg-slate-900/30 overflow-hidden hover:border-slate-700 transition">
+                        <div key={movie.movie_id} className="rounded-sm overflow-hidden transition hover:border-opacity-100" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
                             {/* Movie Header */}
-                            <div className="h-40 bg-gradient-to-br from-slate-800 to-slate-900 p-4 flex flex-col justify-between">
+                            <div className="h-40 p-4 flex flex-col justify-between" style={{background: 'linear-gradient(to bottom right, #262626, #1d1f2b)'}}>
                                 <div>
-                                    <h4 className="text-base font-light mb-2 line-clamp-2">{movie.title}</h4>
+                                    <h4 className="text-base font-light mb-2 line-clamp-2" style={{color: '#f4f4f4'}}>{movie.title}</h4>
                                     <div className="flex flex-wrap gap-1">
-                                        {movie.genre.map(g => <span key={g} className="text-xs bg-slate-700/50 text-slate-300 px-2 py-1 rounded">{g}</span>)}
+                                        {movie.genre.map(g => <span key={g} className="text-xs px-2 py-1 rounded" style={{backgroundColor: 'rgba(59, 60, 69, 0.5)', color: '#c7c7cc'}}>{g}</span>)}
                                     </div>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-sm text-slate-400 font-light">{movie.release_year} · {movie.duration_minutes}m</span>
-                                    <span className="text-lg font-light text-teal-400">{movie.rating}</span>
+                                    <span className="text-sm font-light" style={{color: '#afafba'}}>{movie.release_year} · {movie.duration_minutes}m</span>
+                                    <span className="text-lg font-light" style={{color: '#f4d320'}}>{movie.rating}</span>
                                 </div>
                             </div>
 
                             {/* Movie Info */}
-                            <div className="p-4 border-t border-slate-800/50">
-                                <p className="text-xs text-slate-500 font-light mb-3 uppercase tracking-widest">Cast</p>
-                                <p className="text-sm text-slate-300 font-light line-clamp-2">{movie.cast.join(', ')}</p>
+                            <div className="p-4" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
+                                <p className="text-xs font-light mb-3 uppercase tracking-widest" style={{color: '#595574'}}>Cast</p>
+                                <p className="text-sm font-light line-clamp-2" style={{color: '#c7c7cc'}}>{movie.cast.join(', ')}</p>
                             </div>
                         </div>
                     ))}
@@ -89,32 +90,32 @@ export default function Dashboard({user}) {
             </section>
 
             {/* Footer */}
-            <footer className="max-w-7xl mx-auto px-8 py-12 mt-12 border-t border-slate-800/50">
+            <footer className="max-w-7xl mx-auto px-8 py-12 mt-12" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-8 mb-8">
                     <div>
-                        <h4 className="text-xs uppercase tracking-widest text-slate-500 font-medium mb-4">Product</h4>
-                        <ul className="space-y-2 text-xs text-slate-400 font-light">
-                            <li><a href="#" className="hover:text-white transition">Discover</a></li>
-                            <li><a href="#" className="hover:text-white transition">Trending</a></li>
-                            <li><a href="#" className="hover:text-white transition">Browse</a></li>
+                        <h4 className="text-xs uppercase tracking-widest font-medium mb-4" style={{color: '#595574'}}>Product</h4>
+                        <ul className="space-y-2 text-xs font-light">
+                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Discover</button></li>
+                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Trending</button></li>
+                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Browse</button></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 className="text-xs uppercase tracking-widest text-slate-500 font-medium mb-4">Legal</h4>
-                        <ul className="space-y-2 text-xs text-slate-400 font-light">
-                            <li><a href="#" className="hover:text-white transition">Privacy</a></li>
-                            <li><a href="#" className="hover:text-white transition">Terms</a></li>
+                        <h4 className="text-xs uppercase tracking-widest font-medium mb-4" style={{color: '#595574'}}>Legal</h4>
+                        <ul className="space-y-2 text-xs font-light">
+                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Privacy</button></li>
+                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Terms</button></li>
                         </ul>
                     </div>
                     <div>
-                        <h4 className="text-xs uppercase tracking-widest text-slate-500 font-medium mb-4">Company</h4>
-                        <ul className="space-y-2 text-xs text-slate-400 font-light">
-                            <li><a href="#" className="hover:text-white transition">About</a></li>
-                            <li><a href="#" className="hover:text-white transition">Contact</a></li>
+                        <h4 className="text-xs uppercase tracking-widest font-medium mb-4" style={{color: '#595574'}}>Company</h4>
+                        <ul className="space-y-2 text-xs font-light">
+                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>About</button></li>
+                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Contact</button></li>
                         </ul>
                     </div>
                 </div>
-                <div className="pt-8 border-t border-slate-800/50 text-center text-xs text-slate-500 font-light">
+                <div className="pt-8 text-center text-xs font-light" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px', color: '#595574'}}>
                     <p>MovieHive 2026 · Database Project · FAST-NU</p>
                 </div>
             </footer>

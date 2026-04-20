@@ -1,16 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function Dashboard({user}) {
+export default function Dashboard({user, onLogout}) {
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [movies, setMovies] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedGenre, setSelectedGenre] = useState('');
+    const [genres, setGenres] = useState([]);
 
-    const movies = [
-        { movie_id: 1, title: 'Inception', release_year: 2010, rating: 8.8, duration_minutes: 148, genre: ['Sci-Fi', 'Thriller'], cast: ['Leonardo DiCaprio', 'Marion Cotillard'] },
-        { movie_id: 2, title: 'The Dark Knight', release_year: 2008, rating: 9.0, duration_minutes: 152, genre: ['Crime', 'Drama'], cast: ['Christian Bale', 'Heath Ledger'] },
-        { movie_id: 3, title: 'Interstellar', release_year: 2014, rating: 8.7, duration_minutes: 169, genre: ['Sci-Fi', 'Drama'], cast: ['Matthew McConaughey', 'Anne Hathaway'] },
-        { movie_id: 4, title: 'The Shawshank Redemption', release_year: 1994, rating: 9.3, duration_minutes: 142, genre: ['Drama'], cast: ['Tim Robbins', 'Morgan Freeman'] },
-        { movie_id: 5, title: 'Pulp Fiction', release_year: 1994, rating: 8.9, duration_minutes: 154, genre: ['Crime', 'Drama'], cast: ['John Travolta', 'Samuel L. Jackson'] },
-        { movie_id: 6, title: 'The Matrix', release_year: 1999, rating: 8.7, duration_minutes: 136, genre: ['Sci-Fi', 'Action'], cast: ['Keanu Reeves', 'Laurence Fishburne'] },
-    ];
+    // Fetch genres on mount
+    useEffect(() => {
+        const fetchGenres = async () => {
+            try {
+                const res = await fetch('http://localhost:3001/api/movies/genres/list');
+                const data = await res.json();
+                if (data.success) {
+                    setGenres(data.genres);
+                }
+            } catch (err) {
+                console.error('Failed to fetch genres:', err);
+            }
+        };
+        fetchGenres();
+    }, []);
+
+    // Fetch movies
+    useEffect(() => {
+        const fetchMovies = async () => {
+            setLoading(true);
+            try {
+                let url = 'http://localhost:3001/api/movies?';
+                if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}&`;
+                if (selectedGenre) url += `genre=${encodeURIComponent(selectedGenre)}&`;
+                
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.success) {
+                    setMovies(data.movies || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch movies:', err);
+                setMovies([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        // Debounce search
+        const timer = setTimeout(fetchMovies, 300);
+        return () => clearTimeout(timer);
+    }, [searchTerm, selectedGenre]);
 
     return (
         <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
@@ -43,7 +82,7 @@ export default function Dashboard({user}) {
                                     </div>
                                     <button className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Profile</button>
                                     <button className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Settings</button>
-                                    <button className="w-full text-left px-4 py-2 text-sm transition border-t font-light" style={{color: '#c7c7cc', borderTopColor: '#3b3c45'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Sign Out</button>
+                                    <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm transition border-t font-light" style={{color: '#c7c7cc', borderTopColor: '#3b3c45'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Sign Out</button>
                                 </div>
                             )}
                         </div>
@@ -55,38 +94,73 @@ export default function Dashboard({user}) {
             <section className="max-w-7xl mx-auto px-8 py-16">
                 <div>
                     <h2 className="text-5xl font-light leading-tight mb-4 tracking-tight" style={{color: '#f4d320'}}>MovieHive</h2>
-                    <p className="font-light" style={{color: '#afafba'}}>Explore our collection of movies</p>
+                    <p className="font-light" style={{color: '#afafba'}}>Explore and discover movies</p>
+                </div>
+            </section>
+
+            {/* Search Section */}
+            <section className="max-w-7xl mx-auto px-8 py-8" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px', borderBottomColor: '#3b3c45', borderBottomWidth: '1px'}}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                        type="text"
+                        placeholder="Search movies by title..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="px-4 py-3 rounded-lg"
+                        style={{backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626'}}
+                    />
+                    <select
+                        value={selectedGenre}
+                        onChange={(e) => setSelectedGenre(e.target.value)}
+                        className="px-4 py-3 rounded-lg"
+                        style={{backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626'}}
+                    >
+                        <option value="">All Genres</option>
+                        {genres.map(g => (
+                            <option key={g.genre_id} value={g.genre_name}>{g.genre_name}</option>
+                        ))}
+                    </select>
                 </div>
             </section>
 
             {/* Movie Catalogue */}
-            <section className="max-w-7xl mx-auto px-8 py-12" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
-                <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Movie Catalogue</h3>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {movies.map((movie) => (
-                        <div key={movie.movie_id} className="rounded-sm overflow-hidden transition hover:border-opacity-100" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
-                            {/* Movie Header */}
-                            <div className="h-40 p-4 flex flex-col justify-between" style={{background: 'linear-gradient(to bottom right, #262626, #1d1f2b)'}}>
-                                <div>
-                                    <h4 className="text-base font-light mb-2 line-clamp-2" style={{color: '#f4f4f4'}}>{movie.title}</h4>
-                                    <div className="flex flex-wrap gap-1">
-                                        {movie.genre.map(g => <span key={g} className="text-xs px-2 py-1 rounded" style={{backgroundColor: 'rgba(59, 60, 69, 0.5)', color: '#c7c7cc'}}>{g}</span>)}
+            <section className="max-w-7xl mx-auto px-8 py-12">
+                <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>
+                    {loading ? 'Loading...' : `Found ${movies.length} movie${movies.length !== 1 ? 's' : ''}`}
+                </h3>
+                
+                {loading ? (
+                    <div style={{textAlign: 'center', color: '#afafba'}}>Loading movies...</div>
+                ) : movies.length === 0 ? (
+                    <div style={{textAlign: 'center', color: '#afafba'}}>No movies found. Try different search terms or filters.</div>
+                ) : (
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {movies.map((movie) => (
+                            <div key={movie.movie_id} className="rounded-sm overflow-hidden transition hover:border-opacity-100" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                                {/* Movie Header */}
+                                <div className="h-40 p-4 flex flex-col justify-between" style={{background: 'linear-gradient(to bottom right, #262626, #1d1f2b)'}}>
+                                    <div>
+                                        <h4 className="text-base font-light mb-2 line-clamp-2" style={{color: '#f4f4f4'}}>{movie.title}</h4>
+                                        <div className="flex flex-wrap gap-1">
+                                            {movie.genres && movie.genres.split(', ').map(g => <span key={g} className="text-xs px-2 py-1 rounded" style={{backgroundColor: 'rgba(59, 60, 69, 0.5)', color: '#c7c7cc'}}>{g}</span>)}
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm font-light" style={{color: '#afafba'}}>{movie.release_year} · {movie.duration_minutes}m</span>
+                                        <span className="text-lg font-light" style={{color: '#f4d320'}}>{movie.avg_rating ? parseFloat(movie.avg_rating).toFixed(1) : 'N/A'}</span>
                                     </div>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm font-light" style={{color: '#afafba'}}>{movie.release_year} · {movie.duration_minutes}m</span>
-                                    <span className="text-lg font-light" style={{color: '#f4d320'}}>{movie.rating}</span>
+
+                                {/* Movie Info */}
+                                <div className="p-4" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
+                                    <p className="text-xs font-light mb-2 uppercase tracking-widest" style={{color: '#595574'}}>Description</p>
+                                    <p className="text-sm font-light line-clamp-2" style={{color: '#c7c7cc'}}>{movie.description || 'No description available'}</p>
+                                    <p className="text-xs mt-3" style={{color: '#595574'}}>{movie.review_count} reviews</p>
                                 </div>
                             </div>
-
-                            {/* Movie Info */}
-                            <div className="p-4" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
-                                <p className="text-xs font-light mb-3 uppercase tracking-widest" style={{color: '#595574'}}>Cast</p>
-                                <p className="text-sm font-light line-clamp-2" style={{color: '#c7c7cc'}}>{movie.cast.join(', ')}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
             </section>
 
             {/* Footer */}
@@ -116,7 +190,7 @@ export default function Dashboard({user}) {
                     </div>
                 </div>
                 <div className="pt-8 text-center text-xs font-light" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px', color: '#595574'}}>
-                    <p>MovieHive 2026 · Database Project · FAST-NU</p>
+                    <p>MovieHive 2026 - Database Project - FAST NU</p>
                 </div>
             </footer>
         </div>

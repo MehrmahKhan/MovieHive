@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const sql = require('mssql');
 const authRoutes = require('./controllers/authController');
+const moviesRoutes = require('./routes/moviesRoutes');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
@@ -44,6 +45,9 @@ sql.connect(dbConfig)
 
 // Use auth routes
 app.use("/api/auth", authRoutes);
+
+// Use movies routes
+app.use("/api/movies", moviesRoutes);
 
 app.get('/', (_req, res) => {
     res.send('MovieHive backend is running. Use /api/health for status.');

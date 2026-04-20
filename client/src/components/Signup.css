@@ -156,6 +156,32 @@
     }
 }
 
+/* Per-field validation */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-error {
+    border-color: #ff8f8f !important;
+    background: #fff5f5;
+}
+
+.field-error {
+    font-size: 12px;
+    color: #ff8f8f;
+    margin: 0;
+    font-weight: 500;
+}
+
+.password-hint {
+    font-size: 12px;
+    color: #afafba;
+    margin: 0;
+    font-weight: 400;
+}
+
 @media (max-width: 640px) {
     .auth-page {
         padding: 14px;

@@ -110,4 +110,79 @@ const getGenres = async (req, res) => {
     }
 };
 
-module.exports = { getMovies, getMovieById, getGenres };
+// POST - Add new movie (admin only)
+const addMovie = async (req, res) => {
+    try {
+        const { title, description, release_year, duration_minutes, genreIds } = req.body;
+
+        // Validate input
+        if (!title || !release_year || !duration_minutes) {
+            return res.status(400).json({ success: false, message: 'Title, release year, and duration are required' });
+        }
+
+        let movieId = null;
+
+        try {
+            const request = new sql.Request();
+            
+            // Insert movie with OUTPUT to get the ID
+            const movieResult = await request
+                .input('Title', sql.VarChar, title.trim())
+                .input('Description', sql.VarChar, description ? description.trim() : null)
+                .input('ReleaseYear', sql.Int, parseInt(release_year))
+                .input('DurationMinutes', sql.Int, parseInt(duration_minutes))
+                .query(`
+                    DECLARE @InsertedIds TABLE (id INT);
+                    INSERT INTO Movies (title, description, release_year, duration_minutes)
+                    OUTPUT INSERTED.movie_id INTO @InsertedIds
+                    VALUES (@Title, @Description, @ReleaseYear, @DurationMinutes);
+                    SELECT id as movie_id FROM @InsertedIds;
+                `);
+
+            if (!movieResult.recordset || movieResult.recordset.length === 0) {
+                console.error('Movie insert failed - no ID returned');
+                return res.status(500).json({ success: false, message: 'Failed to insert movie' });
+            }
+
+            movieId = movieResult.recordset[0].movie_id;
+            console.log('✓ Inserted movie with ID:', movieId);
+        } catch (insertErr) {
+            console.error('✗ Insert movie error:', insertErr.message);
+            throw insertErr;
+        }
+
+        // Link genres to movie
+        if (genreIds && Array.isArray(genreIds) && genreIds.length > 0) {
+            try {
+                for (const genreId of genreIds) {
+                    const genreRequest = new sql.Request();
+                    await genreRequest
+                        .input('MovieId', sql.Int, movieId)
+                        .input('GenreId', sql.Int, parseInt(genreId))
+                        .query('INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (@MovieId, @GenreId)');
+                }
+                console.log('✓ Linked', genreIds.length, 'genres to movie', movieId);
+            } catch (genreErr) {
+                console.error('✗ Error linking genres:', genreErr.message);
+                // Don't throw - genre linking failure shouldn't fail the entire operation
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Movie added successfully',
+            movie: {
+                movie_id: movieId,
+                title,
+                description,
+                release_year,
+                duration_minutes
+            }
+        });
+    } catch (err) {
+        console.error('✗ Add movie error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+};
+
+module.exports = { getMovies, getMovieById, getGenres, addMovie };

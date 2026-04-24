@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import AddMovieForm from './AddMovieForm';
 
 export default function AdminDashboard({user, onLogout}) {
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showAddMovieForm, setShowAddMovieForm] = useState(false);
 
     return (
         <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
@@ -84,9 +86,9 @@ export default function AdminDashboard({user, onLogout}) {
                         <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Manage Users</h4>
                         <p className="text-sm" style={{color: '#afafba'}}>View, edit, or remove user accounts and permissions</p>
                     </button>
-                    <button className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Content Management</h4>
-                        <p className="text-sm" style={{color: '#afafba'}}>Add, update, or remove movies and genres from the database</p>
+                    <button onClick={() => setShowAddMovieForm(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Add Movie 🎬</h4>
+                        <p className="text-sm" style={{color: '#afafba'}}>Add new movies to the database with genres and details</p>
                     </button>
                     <button className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
                         <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>View Reports</h4>
@@ -105,6 +107,16 @@ export default function AdminDashboard({user, onLogout}) {
                     <p>MovieHive 2026 - Database Project - FAST NU - Admin Panel</p>
                 </div>
             </footer>
+
+            {/* Add Movie Form Modal */}
+            {showAddMovieForm && (
+                <AddMovieForm
+                    onMovieAdded={() => {
+                        // Optional: refresh movie list or show success message
+                    }}
+                    onClose={() => setShowAddMovieForm(false)}
+                />
+            )}
         </div>
     );
 }

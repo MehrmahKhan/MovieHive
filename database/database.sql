@@ -491,6 +491,99 @@ INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (4, 8, 'Red');
 GO
 
 -- ============================================
+-- ADDITIONAL MOVIES (expand catalog)
+-- ============================================
+
+-- Insert more genres
+INSERT INTO Genres (genre_id, genre_name) VALUES (7, 'Comedy');
+INSERT INTO Genres (genre_id, genre_name) VALUES (8, 'Horror');
+INSERT INTO Genres (genre_id, genre_name) VALUES (9, 'Romance');
+INSERT INTO Genres (genre_id, genre_name) VALUES (10, 'Fantasy');
+GO
+
+-- Insert more movies (7-20)
+SET IDENTITY_INSERT Movies ON;
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (7, 'Forrest Gump', 'A man with a low IQ has accomplished great things', 1994, 142);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (8, 'The Silence of the Lambs', 'A young FBI cadet seeks help from an imprisoned cannibal', 1991, 118);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (9, 'Titanic', 'A love story aboard the ill-fated ship', 1997, 194);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (10, 'Avatar', 'A marine infiltrates an alien world', 2009, 162);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (11, 'The Avengers', 'A team of superheroes save the world', 2012, 143);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (12, 'Jurassic Park', 'Dinosaurs roam a theme park', 1993, 127);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (13, 'The Ring', 'A cursed videotape kills viewers', 2002, 115);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (14, 'The Notebook', 'An elderly man tells his wife their love story', 2004, 123);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (15, 'Harry Potter and the Philosopher''s Stone', 'A young wizard attends magical school', 2001, 152);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (16, 'The Conjuring', 'Paranormal investigators battle supernatural forces', 2013, 112);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (17, 'Forrest Gump Special', 'Extended version with bonus scenes', 1994, 155);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (18, 'The Lion King', 'A young lion prince flees after his father death', 1994, 88);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (19, 'Gladiator', 'A former slave fights for freedom in the arena', 2000, 155);
+INSERT INTO Movies (movie_id, title, description, release_year, duration_minutes) 
+VALUES (20, 'The Pursuit of Happyness', 'A homeless man fights to build a better life', 2006, 117);
+SET IDENTITY_INSERT Movies OFF;
+GO
+
+-- Link new movies to genres
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (7, 2); -- Forrest Gump: Drama
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (8, 5), (8, 3); -- Silence of the Lambs: Crime, Thriller
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (9, 2), (9, 9); -- Titanic: Drama, Romance
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (10, 1), (10, 4); -- Avatar: Sci-Fi, Action
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (11, 4), (11, 1); -- Avengers: Action, Sci-Fi
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (12, 6), (12, 1); -- Jurassic Park: Adventure, Sci-Fi
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (13, 8); -- The Ring: Horror
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (14, 9), (14, 2); -- Notebook: Romance, Drama
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (15, 10), (15, 1); -- Harry Potter: Fantasy, Sci-Fi
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (16, 8); -- Conjuring: Horror
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (17, 2), (17, 7); -- Forrest Gump Special: Drama, Comedy
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (18, 10); -- Lion King: Fantasy
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (19, 4), (19, 2); -- Gladiator: Action, Drama
+INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (20, 2), (20, 7); -- Pursuit: Drama, Comedy
+GO
+
+-- Insert additional cast/persons
+SET IDENTITY_INSERT Persons ON;
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (9, 'Tom Hanks', '1956-07-09');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (10, 'Jodie Foster', '1962-11-19');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (11, 'Kate Winslet', '1975-10-05');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (12, 'Sam Worthington', '1976-08-02');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (13, 'Robert Downey Jr', '1965-04-04');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (14, 'Jeff Goldblum', '1952-10-22');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (15, 'Samara Morgan', '1987-06-17');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (16, 'Rachel McAdams', '1978-11-17');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (17, 'Daniel Radcliffe', '1989-07-23');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (18, 'Vera Farmiga', '1973-08-06');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (19, 'Donald Glover', '1983-09-25');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (20, 'Russell Crowe', '1964-04-06');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (21, 'Will Smith', '1968-09-25');
+SET IDENTITY_INSERT Persons OFF;
+GO
+
+-- Link new cast to movies
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (7, 9, 'Forrest');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (8, 10, 'Clarice');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (9, 11, 'Rose');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (10, 12, 'Jake');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (11, 13, 'Tony');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (12, 14, 'Ian');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (14, 16, 'Allie');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (15, 17, 'Harry');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (16, 18, 'Lorraine');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (19, 20, 'Maximus');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (20, 21, 'Chris');
+GO
+
+-- ============================================
 -- TEST USERS (for demo)
 -- ============================================
 

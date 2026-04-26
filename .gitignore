@@ -46,3 +46,9 @@ pids/
 # Temporary files
 tmp/
 temp/
+
+# Documentation & Roadmap files (not needed in repo)
+DELIVERABLE*.md
+PHASE_*.md
+FEATURES_LIST.md
+*_README.md

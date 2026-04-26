@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({user, onLogout}) {
+    const navigate = useNavigate();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -136,7 +138,11 @@ export default function Dashboard({user, onLogout}) {
                 ) : (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {movies.map((movie) => (
-                            <div key={movie.movie_id} className="rounded-sm overflow-hidden transition hover:border-opacity-100" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                            <div 
+                                key={movie.movie_id} 
+                                onClick={() => navigate(`/movie/${movie.movie_id}`)}
+                                className="rounded-sm overflow-hidden transition hover:border-opacity-100 cursor-pointer hover:scale-105 hover:shadow-lg" 
+                                style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
                                 {/* Movie Header */}
                                 <div className="h-40 p-4 flex flex-col justify-between" style={{background: 'linear-gradient(to bottom right, #262626, #1d1f2b)'}}>
                                     <div>

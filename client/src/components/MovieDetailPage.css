@@ -1,0 +1,586 @@
+/* MovieDetailPage.css - IMDb-style Movie Detail Component */
+
+.movie-detail-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+  color: #f0f0f0;
+  padding-bottom: 60px;
+}
+
+/* Back Button */
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 20px;
+  z-index: 50;
+  margin: 20px 40px;
+  padding: 10px 16px;
+  background: rgba(244, 211, 32, 0.1);
+  border: 1px solid rgba(244, 211, 32, 0.3);
+  color: #f4d320;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  width: fit-content;
+}
+
+.back-button:hover {
+  background: rgba(244, 211, 32, 0.2);
+  border-color: #f4d320;
+  transform: translateX(-4px);
+}
+
+/* Hero Section */
+.movie-hero {
+  position: relative;
+  height: 500px;
+  background: linear-gradient(180deg, rgba(244, 211, 32, 0.1) 0%, rgba(15, 15, 15, 0.8) 100%),
+              url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500"><rect fill="%23222" width="1200" height="500"/></svg>');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+  padding: 60px 40px;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 20%, rgba(15, 15, 15, 0.9) 100%);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.movie-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #ffffff;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  line-height: 1.2;
+}
+
+/* Meta Info */
+.meta-info {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.meta-info span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  color: #e0e0e0;
+}
+
+.meta-info .year {
+  color: #f4d320;
+  font-weight: 600;
+}
+
+.meta-info .duration {
+  color: #b0b0b0;
+}
+
+.meta-info .rating {
+  background: rgba(244, 211, 32, 0.15);
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: #f4d320;
+}
+
+.star-icon {
+  color: #f4d320;
+}
+
+/* Genres */
+.genres-list {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.genre-badge {
+  background: rgba(244, 211, 32, 0.1);
+  border: 1px solid rgba(244, 211, 32, 0.4);
+  color: #f4d320;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.btn-watchlist,
+.btn-rate {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-watchlist {
+  background: #f4d320;
+  color: #0f0f0f;
+}
+
+.btn-watchlist:hover:not(.active) {
+  background: #fde047;
+  transform: scale(1.05);
+}
+
+.btn-watchlist.active {
+  background: #22c55e;
+  color: #ffffff;
+}
+
+.btn-rate {
+  background: rgba(244, 211, 32, 0.2);
+  color: #f4d320;
+  border: 2px solid #f4d320;
+}
+
+.btn-rate:hover {
+  background: rgba(244, 211, 32, 0.3);
+}
+
+/* Main Content Layout */
+.detail-content {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 40px;
+  max-width: 1400px;
+  margin: -80px auto 0;
+  padding: 0 40px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Content Main */
+.content-main {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.detail-section {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.8), rgba(25, 25, 25, 0.8));
+  border: 1px solid rgba(244, 211, 32, 0.1);
+  border-radius: 12px;
+  padding: 30px;
+  backdrop-filter: blur(10px);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #f4d320;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.description {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #d0d0d0;
+}
+
+/* Cast & Crew */
+.cast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.cast-placeholder,
+.similar-placeholder,
+.review-placeholder {
+  grid-column: 1 / -1;
+  padding: 40px;
+  background: rgba(244, 211, 32, 0.05);
+  border: 2px dashed rgba(244, 211, 32, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.cast-placeholder p,
+.similar-placeholder p,
+.review-placeholder p {
+  font-size: 1.1rem;
+  color: #e0e0e0;
+  margin-bottom: 8px;
+}
+
+.cast-placeholder small,
+.similar-placeholder small,
+.review-placeholder small {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Ratings Breakdown */
+.ratings-breakdown {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 40px;
+  align-items: center;
+  padding: 24px;
+  background: rgba(244, 211, 32, 0.05);
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.avg-rating-large {
+  text-align: center;
+}
+
+.rating-number {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #f4d320;
+  line-height: 1;
+}
+
+.rating-stars {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin: 12px 0;
+}
+
+.rating-stars svg {
+  width: 20px;
+  height: 20px;
+  color: #666;
+}
+
+.rating-stars svg.filled {
+  color: #f4d320;
+  fill: #f4d320;
+}
+
+.rating-count {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Rating Distribution */
+.rating-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.distribution-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+}
+
+.distribution-label {
+  color: #f4d320;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.distribution-bar {
+  height: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.distribution-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f4d320, #fbbf24);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.distribution-count {
+  color: #888;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+/* Review Add Section */
+.review-add-section {
+  padding: 24px;
+  background: rgba(244, 211, 32, 0.08);
+  border: 2px solid rgba(244, 211, 32, 0.2);
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.btn-add-review {
+  padding: 12px 32px;
+  background: #f4d320;
+  color: #0f0f0f;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.btn-add-review:hover {
+  background: #fde047;
+  transform: scale(1.02);
+}
+
+.review-add-section small {
+  display: block;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Reviews List */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Similar Movies */
+.similar-movies {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+/* Sidebar */
+.detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.sidebar-card {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(25, 25, 25, 0.9));
+  border: 1px solid rgba(244, 211, 32, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.sidebar-card h3 {
+  color: #f4d320;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(244, 211, 32, 0.2);
+}
+
+/* Info Card */
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(244, 211, 32, 0.05);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item .label {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.info-item .value {
+  color: #e0e0e0;
+  font-weight: 600;
+  text-align: right;
+  max-width: 50%;
+}
+
+.info-item .rating-value {
+  color: #f4d320;
+  font-weight: 700;
+}
+
+/* Status Card */
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-item {
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-item.completed {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border-left: 3px solid #22c55e;
+  padding-left: 12px;
+}
+
+.status-item.in-progress {
+  background: rgba(244, 211, 32, 0.1);
+  color: #f4d320;
+  border-left: 3px solid #f4d320;
+  padding-left: 12px;
+}
+
+.status-item.pending {
+  background: rgba(100, 100, 100, 0.1);
+  color: #999;
+  border-left: 3px solid #666;
+  padding-left: 12px;
+}
+
+/* Loading & Error */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: #f4d320;
+}
+
+.error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  font-size: 1.3rem;
+  color: #ff6b6b;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .detail-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .detail-sidebar {
+    position: relative;
+    top: 0;
+  }
+
+  .movie-title {
+    font-size: 2.2rem;
+  }
+
+  .ratings-breakdown {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .movie-hero {
+    height: 350px;
+    padding: 40px 20px;
+  }
+
+  .movie-title {
+    font-size: 1.8rem;
+  }
+
+  .meta-info {
+    gap: 16px;
+    font-size: 0.95rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .btn-watchlist,
+  .btn-rate {
+    width: 100%;
+  }
+
+  .detail-section {
+    padding: 20px;
+  }
+
+  .detail-content {
+    padding: 0 20px;
+  }
+
+  .back-button {
+    margin: 16px 20px;
+  }
+
+  .genres-list {
+    gap: 8px;
+  }
+
+  .genre-badge {
+    font-size: 0.85rem;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-hero {
+    height: 250px;
+    padding: 30px 16px;
+  }
+
+  .movie-title {
+    font-size: 1.4rem;
+  }
+
+  .meta-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .cast-grid {
+    grid-template-columns: 1fr;
+  }
+}

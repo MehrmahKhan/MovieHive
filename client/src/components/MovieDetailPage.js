@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReviewForm from './ReviewForm';
+import ReviewList from './ReviewList';
 import './MovieDetailPage.css';
+import './ReviewStyles.css';
 
 // Icon components using Unicode symbols
 const ChevronLeft = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>‹</span>;
 const Star = ({ size = 20, className = '' }) => <span style={{fontSize: `${size}px`, lineHeight: 1}} className={className}>★</span>;
-const Clock = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>🕐</span>;
-const Calendar = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>📅</span>;
-const Users = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>👥</span>;
+const Clock = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>⏱</span>;
+const Calendar = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>●</span>;
+const Users = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>◉</span>;
 
 const MovieDetailPage = () => {
   const { movieId } = useParams();
@@ -16,6 +19,13 @@ const MovieDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [inWatchlist, setInWatchlist] = useState(false);
+  
+  // Review states
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [userReview, setUserReview] = useState(null);
+  const [reviewsRefresh, setReviewsRefresh] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [movieReviews, setMovieReviews] = useState([]);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -34,12 +44,49 @@ const MovieDetailPage = () => {
       }
     };
 
+    // Get current user from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setCurrentUser(user);
+    }
+
     fetchMovieDetails();
   }, [movieId]);
+
+  // Fetch user's existing review for this movie
+  useEffect(() => {
+    if (!currentUser || !movieId) return;
+
+    const fetchUserReview = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3001/api/reviews/user/${movieId}?userId=${currentUser.id}`
+        );
+        const data = await response.json();
+        if (data.success && data.review) {
+          setUserReview(data.review);
+        } else {
+          setUserReview(null);
+        }
+      } catch (err) {
+        console.error('Error fetching user review:', err);
+      }
+    };
+
+    fetchUserReview();
+  }, [currentUser, movieId, reviewsRefresh]);
 
   const handleWatchlist = () => {
     setInWatchlist(!inWatchlist);
     // TODO: Phase 2.5+ - Connect to backend watchlist endpoint
+  };
+
+  const handleReviewSubmitted = (newReview) => {
+    setUserReview(newReview);
+    setShowReviewForm(false);
+    // Trigger refresh of review list
+    setReviewsRefresh(prev => prev + 1);
   };
 
   if (loading) {
@@ -71,6 +118,15 @@ const MovieDetailPage = () => {
   const genres = movie.genres ? movie.genres.split(', ') : [];
   const avgRating = movie.avg_rating ? parseFloat(movie.avg_rating).toFixed(1) : 'N/A';
   const reviewCount = movie.review_count || 0;
+  const displayedReviewCount = movieReviews.length > 0 ? movieReviews.length : reviewCount;
+  const reviewTotals = movieReviews.reduce((counts, review) => {
+    const rating = Number(review.rating);
+    if (rating >= 1 && rating <= 5) {
+      counts[rating - 1] += 1;
+    }
+    return counts;
+  }, [0, 0, 0, 0, 0]);
+  const totalForDistribution = movieReviews.length || reviewCount;
 
   return (
     <div className="movie-detail-container">
@@ -120,7 +176,7 @@ const MovieDetailPage = () => {
               onClick={handleWatchlist}
               className={`btn-watchlist ${inWatchlist ? 'active' : ''}`}
             >
-              {inWatchlist ? '✓ In Watchlist' : '+ Add to Watchlist'}
+              {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
             </button>
             <button className="btn-rate">
               <Star size={18} />
@@ -173,43 +229,69 @@ const MovieDetailPage = () => {
                     />
                   ))}
                 </div>
-                <div className="rating-count">{reviewCount} ratings</div>
+                <div className="rating-count">{displayedReviewCount} ratings</div>
               </div>
 
               {/* Rating Distribution Bars */}
               <div className="rating-distribution">
-                {[5, 4, 3, 2, 1].map((stars) => (
+                {[5, 4, 3, 2, 1].map((stars) => {
+                  const count = reviewTotals[stars - 1] || 0;
+                  const width = totalForDistribution > 0 ? (count / totalForDistribution) * 100 : 0;
+
+                  return (
                   <div key={stars} className="distribution-row">
                     <span className="distribution-label">{stars}★</span>
                     <div className="distribution-bar">
                       <div 
                         className="distribution-fill"
-                        style={{ width: `${Math.random() * 80 + 20}%` }}
+                        style={{ width: `${width}%` }}
                       />
                     </div>
                     <span className="distribution-count">
-                      {Math.floor(Math.random() * 200)}
+                      {count}
                     </span>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             {/* Add Review Button */}
-            <div className="review-add-section">
-              <button className="btn-add-review">
-                Write Your Review
-              </button>
-              <small>Phase 3: Review form will appear here</small>
-            </div>
-
-            {/* Reviews List Placeholder */}
-            <div className="reviews-list">
-              <div className="review-placeholder">
-                <p>User reviews will appear here in Phase 3</p>
-                <small>Review component coming soon...</small>
+            {currentUser && !showReviewForm ? (
+              <div className="review-add-section">
+                <button 
+                  onClick={() => setShowReviewForm(true)}
+                  className="btn-add-review"
+                >
+                  {userReview ? 'Edit Your Review' : 'Write Your Review'}
+                </button>
               </div>
-            </div>
+            ) : null}
+
+            {/* Review Form */}
+            {currentUser && showReviewForm && (
+              <ReviewForm
+                movieId={parseInt(movieId)}
+                userId={currentUser.id}
+                existingReview={userReview}
+                onReviewSubmitted={handleReviewSubmitted}
+                onCancel={() => setShowReviewForm(false)}
+              />
+            )}
+
+            {/* Reviews List */}
+            {currentUser ? (
+              <ReviewList
+                movieId={parseInt(movieId)}
+                currentUserId={currentUser.id}
+                refreshTrigger={reviewsRefresh}
+                onReviewsLoaded={setMovieReviews}
+              />
+            ) : (
+              <div className="reviews-empty">
+                Please login to see and write reviews.
+              </div>
+            )}
           </section>
 
           {/* Similar Movies Section */}
@@ -257,19 +339,19 @@ const MovieDetailPage = () => {
             <h3>Development Status</h3>
             <div className="status-list">
               <div className="status-item completed">
-                ✓ Movie Details Display
+                [DONE] Movie Details Display
               </div>
               <div className="status-item completed">
-                ✓ Ratings & Reviews Section
+                [DONE] Ratings & Reviews Section
               </div>
-              <div className="status-item in-progress">
-                ⏳ Phase 3: User Reviews
-              </div>
-              <div className="status-item pending">
-                ⊘ Phase 4: Similar Movies
+              <div className="status-item completed">
+                [DONE] Phase 3: User Reviews
               </div>
               <div className="status-item pending">
-                ⊘ Phase 4: Cast Details
+                [TODO] Phase 4: Similar Movies
+              </div>
+              <div className="status-item pending">
+                [TODO] Phase 4: Cast Details
               </div>
             </div>
           </div>

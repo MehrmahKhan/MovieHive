@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Signup from './components/Signup';
@@ -10,8 +10,22 @@ function App() {
     const [user, setUser] = useState(null);
     const [showSignup, setShowSignup] = useState(false);
 
+    // Restore user from localStorage on initial load
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+    const handleLogin = (userData) => {
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+    };
+
     const handleLogout = () => {
         setUser(null);
+        localStorage.removeItem('user');
         setShowSignup(false);
     };
 
@@ -19,8 +33,8 @@ function App() {
         return (
             <div className="bg-slate-950 min-h-screen">
                 {showSignup ? 
-                    <Signup onSignup={setUser} switchLogin={() => setShowSignup(false)} /> :
-                    <Login onLogin={setUser} switchSignup={() => setShowSignup(true)} />
+                    <Signup onSignup={handleLogin} switchLogin={() => setShowSignup(false)} /> :
+                    <Login onLogin={handleLogin} switchSignup={() => setShowSignup(true)} />
                 }
             </div>
         );

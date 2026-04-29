@@ -407,6 +407,7 @@ GO
 GRANT EXECUTE ON dbo.usp_UserLogin TO [moviehive_app];
 GRANT EXECUTE ON dbo.usp_UserSignup TO [moviehive_app];
 GRANT EXECUTE ON dbo.usp_GetCooldownSuggestions TO [moviehive_app];
+GRANT EXECUTE ON OBJECT::dbo.fn_ReviewSentimentScore TO [moviehive_app];
 
 -- If user doesn't exist yet, create it
 IF NOT EXISTS (SELECT 1 FROM sys.sql_logins WHERE name = 'moviehive_app')

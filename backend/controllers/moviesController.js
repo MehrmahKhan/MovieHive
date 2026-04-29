@@ -145,7 +145,7 @@ const addMovie = async (req, res) => {
             }
 
             movieId = movieResult.recordset[0].movie_id;
-            console.log('✓ Inserted movie with ID:', movieId);
+            console.log('[OK] Inserted movie with ID:', movieId);
         } catch (insertErr) {
             console.error('✗ Insert movie error:', insertErr.message);
             throw insertErr;
@@ -161,7 +161,7 @@ const addMovie = async (req, res) => {
                         .input('GenreId', sql.Int, parseInt(genreId))
                         .query('INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (@MovieId, @GenreId)');
                 }
-                console.log('✓ Linked', genreIds.length, 'genres to movie', movieId);
+                console.log('[OK] Linked', genreIds.length, 'genres to movie', movieId);
             } catch (genreErr) {
                 console.error('✗ Error linking genres:', genreErr.message);
                 // Don't throw - genre linking failure shouldn't fail the entire operation

@@ -79,7 +79,7 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
 
             if (data.success) {
                 setIsSuccess(true);
-                setMessage('Movie added successfully! 🎬');
+                setMessage('Movie added successfully!');
                 setFieldErrors({});
                 // Reset form
                 setTitle('');

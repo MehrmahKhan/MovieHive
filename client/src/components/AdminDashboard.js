@@ -87,7 +87,7 @@ export default function AdminDashboard({user, onLogout}) {
                         <p className="text-sm" style={{color: '#afafba'}}>View, edit, or remove user accounts and permissions</p>
                     </button>
                     <button onClick={() => setShowAddMovieForm(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Add Movie 🎬</h4>
+                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Add Movie</h4>
                         <p className="text-sm" style={{color: '#afafba'}}>Add new movies to the database with genres and details</p>
                     </button>
                     <button className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>

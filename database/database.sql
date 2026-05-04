@@ -598,3 +598,43 @@ VALUES ('Demo User', 'demo@test.com', '$2b$10$Dq0pUhI0TY5Y5Y5Y5Y5Y5e.rKqYmYmYmYm
 INSERT INTO Users (name, email, password_hash, role) 
 VALUES ('Admin', 'admin@moviehive.com', '$2b$10$Dq0pUhI0TY5Y5Y5Y5Y5Y5e.rKqYmYmYmYmYmYmYmY', 'admin');
 GO
+
+-- ============================================
+-- FRIENDS & MESSAGING TABLES
+-- ============================================
+
+-- FriendRequests Table: Stores friend requests between users
+CREATE TABLE FriendRequests (
+    request_id INT PRIMARY KEY IDENTITY(1,1),
+    from_user_id INT NOT NULL,
+    to_user_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (from_user_id) REFERENCES Users(user_id) ON DELETE NO ACTION,
+    FOREIGN KEY (to_user_id) REFERENCES Users(user_id) ON DELETE NO ACTION
+);
+GO
+
+-- Friends Table: Stores mutual friendships (bidirectional entries)
+CREATE TABLE Friends (
+    user_id INT NOT NULL,
+    friend_id INT NOT NULL,
+    since DATETIME NOT NULL DEFAULT GETDATE(),
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE NO ACTION,
+    FOREIGN KEY (friend_id) REFERENCES Users(user_id) ON DELETE NO ACTION
+);
+GO
+
+-- Messages Table: Stores direct messages between friends
+CREATE TABLE Messages (
+    message_id INT PRIMARY KEY IDENTITY(1,1),
+    sender_id INT NOT NULL,
+    recipient_id INT NOT NULL,
+    content VARCHAR(2000) NOT NULL,
+    sent_at DATETIME DEFAULT GETDATE(),
+    is_read BIT NOT NULL DEFAULT 0,
+    FOREIGN KEY (sender_id) REFERENCES Users(user_id) ON DELETE NO ACTION,
+    FOREIGN KEY (recipient_id) REFERENCES Users(user_id) ON DELETE NO ACTION
+);
+GO

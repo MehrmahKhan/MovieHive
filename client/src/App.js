@@ -5,6 +5,8 @@ import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import AdminDashboard from './components/AdminDashboard';
 import MovieDetailPage from './components/MovieDetailPage';
+import FriendsPage from './components/FriendsPage';
+import ChatWindow from './components/ChatWindow';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -52,6 +54,8 @@ function App() {
                     <>
                         <Route path="/" element={<Dashboard user={user} onLogout={handleLogout} />} />
                         <Route path="/movie/:movieId" element={<MovieDetailPage />} />
+                        <Route path="/friends" element={<FriendsPage currentUser={user} />} />
+                        <Route path="/chat/:friendId" element={<ChatWindow currentUser={user} />} />
                     </>
                 )}
                 <Route path="*" element={<Navigate to="/" replace />} />

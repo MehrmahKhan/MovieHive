@@ -61,7 +61,7 @@ function Signup({ onSignup, switchLogin }) {
         setMessage(data.message);
         setFieldErrors({});
         setTimeout(() => {
-          onSignup({ name: username, email: email, role: data.role || role });
+          onSignup(data.user);
         }, 1500);
       } else {
         setIsSuccess(false);

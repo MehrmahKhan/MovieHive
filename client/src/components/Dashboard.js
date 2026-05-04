@@ -65,6 +65,7 @@ export default function Dashboard({user, onLogout}) {
                             <button className="transition hover:text-white">Discover</button>
                             <button className="transition hover:text-white">Trending</button>
                             <button className="transition hover:text-white">My Watchlist</button>
+                            <button onClick={() => navigate('/friends')} className="transition hover:text-white">Friends</button>
                         </div>
 
                         <div className="relative">

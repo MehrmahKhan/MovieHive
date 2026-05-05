@@ -7,6 +7,7 @@ const moviesRoutes = require('./routes/moviesRoutes');
 const reviewsRoutes = require('./routes/reviewsRoutes');
 const friendsRoutes = require('./routes/friendsRoutes');
 const messagesRoutes = require('./routes/messagesRoutes');
+const watchlistRoutes = require('./routes/watchlistRoutes');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
@@ -60,6 +61,9 @@ app.use("/api/friends", friendsRoutes);
 
 // Use messages routes
 app.use("/api/messages", messagesRoutes);
+
+// Use watchlist routes
+app.use('/api/watchlist', watchlistRoutes);
 
 app.get('/', (_req, res) => {
     res.send('MovieHive backend is running. Use /api/health for status.');

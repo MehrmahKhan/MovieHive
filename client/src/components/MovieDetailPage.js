@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import BackButton from './BackButton';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import './MovieDetailPage.css';
@@ -19,6 +20,7 @@ const MovieDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [inWatchlist, setInWatchlist] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
   
   // Review states
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -51,6 +53,26 @@ const MovieDetailPage = () => {
       setCurrentUser(user);
     }
 
+    // Check if in watchlist when user/movie available
+    const checkWatchlistIfReady = async () => {
+      const stored = localStorage.getItem('user');
+      if (!stored) return;
+      const user = JSON.parse(stored);
+      if (!user || !movieId) return;
+      try {
+        const res = await fetch(`http://localhost:3001/api/watchlist/${user.id}`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.movies)) {
+          const found = data.movies.some(m => String(m.movie_id) === String(movieId) || m.movie_id === movie?.movie_id);
+          setInWatchlist(found);
+        }
+      } catch (err) {
+        console.error('Error checking watchlist', err);
+      }
+    };
+
+    checkWatchlistIfReady();
+
     fetchMovieDetails();
   }, [movieId]);
 
@@ -77,9 +99,49 @@ const MovieDetailPage = () => {
     fetchUserReview();
   }, [currentUser, movieId, reviewsRefresh]);
 
-  const handleWatchlist = () => {
-    setInWatchlist(!inWatchlist);
-    // TODO: Phase 2.5+ - Connect to backend watchlist endpoint
+  const handleWatchlist = async () => {
+    const stored = localStorage.getItem('user');
+    if (!stored) return alert('Please login');
+    const user = JSON.parse(stored);
+    if (!user?.id) return alert('User ID missing');
+
+    if (watchlistLoading) return; // avoid duplicate clicks
+    setWatchlistLoading(true);
+
+    try {
+      if (inWatchlist) {
+        const res = await fetch('http://localhost:3001/api/watchlist/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, movieId: parseInt(movieId) })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setInWatchlist(false);
+        } else {
+          console.warn('Remove failed:', data.message);
+          alert(data.message || 'Failed to remove from watchlist');
+        }
+      } else {
+        const res = await fetch('http://localhost:3001/api/watchlist/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, movieId: parseInt(movieId) })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setInWatchlist(true);
+        } else {
+          console.warn('Add failed:', data.message);
+          alert(data.message || 'Failed to add to watchlist');
+        }
+      }
+    } catch (err) {
+      console.error('Watchlist toggle error', err);
+      alert('Network error toggling watchlist');
+    } finally {
+      setWatchlistLoading(false);
+    }
   };
 
   const handleReviewSubmitted = (newReview) => {
@@ -131,13 +193,9 @@ const MovieDetailPage = () => {
   return (
     <div className="movie-detail-container">
       {/* Back Button */}
-      <button 
-        onClick={() => navigate(-1)}
-        className="back-button"
-      >
-        <ChevronLeft size={20} />
-        Back to Movies
-      </button>
+      <div style={{ marginBottom: 12 }}>
+        <BackButton label={'Back to Movies'} />
+      </div>
 
       {/* Hero Section */}
       <div className="movie-hero">
@@ -175,8 +233,9 @@ const MovieDetailPage = () => {
             <button 
               onClick={handleWatchlist}
               className={`btn-watchlist ${inWatchlist ? 'active' : ''}`}
+              disabled={watchlistLoading}
             >
-              {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
+              {watchlistLoading ? (inWatchlist ? 'Removing...' : 'Adding...') : (inWatchlist ? 'In Watchlist' : 'Add to Watchlist')}
             </button>
             <button className="btn-rate">
               <Star size={18} />

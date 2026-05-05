@@ -61,10 +61,10 @@ export default function Dashboard({user, onLogout}) {
                     <h1 className="text-2xl font-light tracking-tight">MovieHive</h1>
 
                     <div className="flex items-center gap-8">
-                        <div className="hidden md:flex gap-8 text-sm font-light" style={{color: '#c7c7cc'}}>
+                            <div className="hidden md:flex gap-8 text-sm font-light" style={{color: '#c7c7cc'}}>
                             <button className="transition hover:text-white">Discover</button>
                             <button className="transition hover:text-white">Trending</button>
-                            <button className="transition hover:text-white">My Watchlist</button>
+                            <button onClick={() => navigate('/watchlist')} className="transition hover:text-white">My Watchlist</button>
                             <button onClick={() => navigate('/friends')} className="transition hover:text-white">Friends</button>
                         </div>
 
@@ -141,7 +141,7 @@ export default function Dashboard({user, onLogout}) {
                         {movies.map((movie) => (
                             <div 
                                 key={movie.movie_id} 
-                                onClick={() => navigate(`/movie/${movie.movie_id}`)}
+                                onClick={() => navigate(`/movie/${movie.movie_id}`, { state: { from: 'home' } })}
                                 className="rounded-sm overflow-hidden transition hover:border-opacity-100 cursor-pointer hover:scale-105 hover:shadow-lg" 
                                 style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
                                 {/* Movie Header */}

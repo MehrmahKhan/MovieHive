@@ -1,0 +1,6 @@
+.watchlist-container { padding: 24px; color: #f4f4f4; }
+.watchlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 12px; }
+.watchlist-card { background: rgba(29,31,43,0.6); padding: 12px; border: 1px solid #3b3c45; border-radius: 6px; }
+.watchlist-title { cursor: pointer; color: #f4d320; }
+.watchlist-actions { display:flex; gap:8px; margin-top:8px; }
+.watchlist-actions button { padding:6px 10px; border-radius:4px; background:#262626; color:#c7c7cc; border:1px solid #3b3c45; }

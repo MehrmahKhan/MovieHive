@@ -9,6 +9,7 @@ export default function Dashboard({user, onLogout}) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedGenre, setSelectedGenre] = useState('');
     const [genres, setGenres] = useState([]);
+    const [browseSection, setBrowseSection] = useState('discover');
 
     // Fetch genres on mount
     useEffect(() => {
@@ -32,8 +33,12 @@ export default function Dashboard({user, onLogout}) {
             setLoading(true);
             try {
                 let url = 'http://localhost:3001/api/movies?';
-                if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}&`;
-                if (selectedGenre) url += `genre=${encodeURIComponent(selectedGenre)}&`;
+                if (browseSection !== 'discover') {
+                    url = `http://localhost:3001/api/movies/browse/${browseSection}`;
+                } else {
+                    if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}&`;
+                    if (selectedGenre) url += `genre=${encodeURIComponent(selectedGenre)}&`;
+                }
                 
                 const res = await fetch(url);
                 const data = await res.json();
@@ -51,7 +56,16 @@ export default function Dashboard({user, onLogout}) {
         // Debounce search
         const timer = setTimeout(fetchMovies, 300);
         return () => clearTimeout(timer);
-    }, [searchTerm, selectedGenre]);
+    }, [searchTerm, selectedGenre, browseSection]);
+
+    const sectionTitle =
+        browseSection === 'trending'
+            ? 'Trending Now'
+            : browseSection === 'upcoming'
+            ? 'Upcoming Releases'
+            : browseSection === 'top-rated'
+            ? 'Top Rated Picks'
+            : 'Discover Movies';
 
     return (
         <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
@@ -62,8 +76,10 @@ export default function Dashboard({user, onLogout}) {
 
                     <div className="flex items-center gap-8">
                             <div className="hidden md:flex gap-8 text-sm font-light" style={{color: '#c7c7cc'}}>
-                            <button className="transition hover:text-white">Discover</button>
-                            <button className="transition hover:text-white">Trending</button>
+                            <button onClick={() => setBrowseSection('discover')} className="transition hover:text-white">Discover</button>
+                            <button onClick={() => setBrowseSection('trending')} className="transition hover:text-white">Trending</button>
+                            <button onClick={() => setBrowseSection('upcoming')} className="transition hover:text-white">Upcoming</button>
+                            <button onClick={() => setBrowseSection('top-rated')} className="transition hover:text-white">Top Rated</button>
                             <button onClick={() => navigate('/watchlist')} className="transition hover:text-white">My Watchlist</button>
                             <button onClick={() => navigate('/friends')} className="transition hover:text-white">Friends</button>
                         </div>
@@ -97,7 +113,7 @@ export default function Dashboard({user, onLogout}) {
             <section className="max-w-7xl mx-auto px-8 py-16">
                 <div>
                     <h2 className="text-5xl font-light leading-tight mb-4 tracking-tight" style={{color: '#f4d320'}}>MovieHive</h2>
-                    <p className="font-light" style={{color: '#afafba'}}>Explore and discover movies</p>
+                    <p className="font-light" style={{color: '#afafba'}}>{sectionTitle}</p>
                 </div>
             </section>
 
@@ -110,12 +126,14 @@ export default function Dashboard({user, onLogout}) {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="px-4 py-3 rounded-lg"
+                        disabled={browseSection !== 'discover'}
                         style={{backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626'}}
                     />
                     <select
                         value={selectedGenre}
                         onChange={(e) => setSelectedGenre(e.target.value)}
                         className="px-4 py-3 rounded-lg"
+                        disabled={browseSection !== 'discover'}
                         style={{backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626'}}
                     >
                         <option value="">All Genres</option>
@@ -129,7 +147,7 @@ export default function Dashboard({user, onLogout}) {
             {/* Movie Catalogue */}
             <section className="max-w-7xl mx-auto px-8 py-12">
                 <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>
-                    {loading ? 'Loading...' : `Found ${movies.length} movie${movies.length !== 1 ? 's' : ''}`}
+                    {loading ? 'Loading...' : `${sectionTitle}: ${movies.length} movie${movies.length !== 1 ? 's' : ''}`}
                 </h3>
                 
                 {loading ? (
@@ -176,9 +194,9 @@ export default function Dashboard({user, onLogout}) {
                     <div>
                         <h4 className="text-xs uppercase tracking-widest font-medium mb-4" style={{color: '#595574'}}>Product</h4>
                         <ul className="space-y-2 text-xs font-light">
-                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Discover</button></li>
-                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Trending</button></li>
-                            <li><button className="transition hover:text-white" style={{color: '#afafba'}}>Browse</button></li>
+                            <li><button onClick={() => setBrowseSection('discover')} className="transition hover:text-white" style={{color: '#afafba'}}>Discover</button></li>
+                            <li><button onClick={() => setBrowseSection('trending')} className="transition hover:text-white" style={{color: '#afafba'}}>Trending</button></li>
+                            <li><button onClick={() => setBrowseSection('top-rated')} className="transition hover:text-white" style={{color: '#afafba'}}>Top Rated</button></li>
                         </ul>
                     </div>
                     <div>

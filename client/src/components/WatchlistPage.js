@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackButton from './BackButton';
 import './WatchlistPage.css';
 
 export default function WatchlistPage() {
     const navigate = useNavigate();
-    // include a back button that goes to movies list
-    const [showBack, setShowBack] = React.useState(true);
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -29,9 +28,6 @@ export default function WatchlistPage() {
 
         fetchWatchlist();
     }, [navigate]);
-
-    // Back button component (lazy import to avoid circulars)
-    const BackButton = require('./BackButton').default;
 
     const handleRemove = async (movieId) => {
         const stored = localStorage.getItem('user');

@@ -63,7 +63,7 @@ const MovieDetailPage = () => {
         const res = await fetch(`http://localhost:3001/api/watchlist/${user.id}`);
         const data = await res.json();
         if (data.success && Array.isArray(data.movies)) {
-          const found = data.movies.some(m => String(m.movie_id) === String(movieId) || m.movie_id === movie?.movie_id);
+          const found = data.movies.some(m => String(m.movie_id) === String(movieId));
           setInWatchlist(found);
         }
       } catch (err) {

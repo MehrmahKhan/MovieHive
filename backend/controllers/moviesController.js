@@ -57,6 +57,54 @@ const getMovies = async (req, res) => {
     }
 };
 
+// GET browse section movies (discover | trending | upcoming | top-rated)
+const getBrowseMovies = async (req, res) => {
+    try {
+        const section = (req.params.section || 'discover').toLowerCase();
+
+        let query = `
+            SELECT DISTINCT
+                m.movie_id,
+                m.title,
+                m.description,
+                m.release_year,
+                m.duration_minutes,
+                AVG(CAST(r.rating AS DECIMAL(5,2))) AS avg_rating,
+                COUNT(r.review_id) AS review_count,
+                STRING_AGG(g.genre_name, ', ') AS genres
+            FROM Movies m
+            LEFT JOIN Reviews r ON r.movie_id = m.movie_id
+            LEFT JOIN Movie_Genres mg ON mg.movie_id = m.movie_id
+            LEFT JOIN Genres g ON g.genre_id = mg.genre_id
+            GROUP BY m.movie_id, m.title, m.description, m.release_year, m.duration_minutes
+        `;
+
+        if (section === 'trending') {
+            query += ` ORDER BY COUNT(r.review_id) DESC, AVG(CAST(r.rating AS DECIMAL(5,2))) DESC, m.title ASC`;
+        } else if (section === 'upcoming') {
+            // Project-friendly interpretation: most recent/newest releases
+            query += ` ORDER BY m.release_year DESC, m.title ASC`;
+        } else if (section === 'top-rated') {
+            query += ` ORDER BY AVG(CAST(r.rating AS DECIMAL(5,2))) DESC, COUNT(r.review_id) DESC, m.title ASC`;
+        } else {
+            query += ` ORDER BY m.title ASC`;
+        }
+
+        const request = new sql.Request();
+        const result = await request.query(query);
+
+        res.json({
+            success: true,
+            section,
+            movies: result.recordset || [],
+            count: (result.recordset || []).length
+        });
+    } catch (err) {
+        console.error('Get browse movies error:', err);
+        res.status(500).json({ success: false, message: 'Failed to fetch browse movies' });
+    }
+};
+
 // GET movie by ID with reviews
 const getMovieById = async (req, res) => {
     try {
@@ -185,4 +233,4 @@ const addMovie = async (req, res) => {
     }
 };
 
-module.exports = { getMovies, getMovieById, getGenres, addMovie };
+module.exports = { getMovies, getBrowseMovies, getMovieById, getGenres, addMovie };

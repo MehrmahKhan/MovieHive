@@ -8,6 +8,8 @@ import MovieDetailPage from './components/MovieDetailPage';
 import FriendsPage from './components/FriendsPage';
 import ChatWindow from './components/ChatWindow';
 import WatchlistPage from './components/WatchlistPage';
+import ProfilePage from './components/ProfilePage';
+import SettingsPage from './components/SettingsPage';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -30,6 +32,11 @@ function App() {
         setUser(null);
         localStorage.removeItem('user');
         setShowSignup(false);
+    };
+
+    const handleUserUpdate = (updatedUser) => {
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
     };
 
     if (!user) {
@@ -55,7 +62,9 @@ function App() {
                     <>
                         <Route path="/" element={<Dashboard user={user} onLogout={handleLogout} />} />
                         <Route path="/movie/:movieId" element={<MovieDetailPage />} />
-                            <Route path="/watchlist" element={<WatchlistPage />} />
+                        <Route path="/watchlist" element={<WatchlistPage />} />
+                        <Route path="/profile" element={<ProfilePage currentUser={user} onUserUpdate={handleUserUpdate} />} />
+                        <Route path="/settings" element={<SettingsPage currentUser={user} />} />
                         <Route path="/friends" element={<FriendsPage currentUser={user} />} />
                         <Route path="/chat/:friendId" element={<ChatWindow currentUser={user} />} />
                     </>

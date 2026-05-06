@@ -6,6 +6,7 @@ export default function Dashboard({user, onLogout}) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedGenre, setSelectedGenre] = useState('');
     const [genres, setGenres] = useState([]);
@@ -31,6 +32,7 @@ export default function Dashboard({user, onLogout}) {
     useEffect(() => {
         const fetchMovies = async () => {
             setLoading(true);
+            setErrorMessage('');
             try {
                 let url = 'http://localhost:3001/api/movies?';
                 if (browseSection !== 'discover') {
@@ -44,10 +46,14 @@ export default function Dashboard({user, onLogout}) {
                 const data = await res.json();
                 if (data.success) {
                     setMovies(data.movies || []);
+                } else {
+                    setMovies([]);
+                    setErrorMessage(data.message || 'Failed to load movies for this section');
                 }
             } catch (err) {
                 console.error('Failed to fetch movies:', err);
                 setMovies([]);
+                setErrorMessage('Network error while loading movies. Please try again.');
             } finally {
                 setLoading(false);
             }
@@ -99,8 +105,8 @@ export default function Dashboard({user, onLogout}) {
                                         <p className="font-light text-sm" style={{color: '#f4f4f4'}}>{user?.name || 'User'}</p>
                                         <p className="text-xs" style={{color: '#afafba'}}>{user?.email || 'email@example.com'}</p>
                                     </div>
-                                    <button className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Profile</button>
-                                    <button className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Settings</button>
+                                    <button onClick={() => navigate('/profile')} className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Profile</button>
+                                    <button onClick={() => navigate('/settings')} className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Settings</button>
                                     <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm transition border-t font-light" style={{color: '#c7c7cc', borderTopColor: '#3b3c45'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Sign Out</button>
                                 </div>
                             )}
@@ -149,11 +155,19 @@ export default function Dashboard({user, onLogout}) {
                 <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>
                     {loading ? 'Loading...' : `${sectionTitle}: ${movies.length} movie${movies.length !== 1 ? 's' : ''}`}
                 </h3>
+
+                {errorMessage ? (
+                    <div style={{ textAlign: 'center', color: '#ffb4b4', marginBottom: 16 }}>{errorMessage}</div>
+                ) : null}
                 
                 {loading ? (
                     <div style={{textAlign: 'center', color: '#afafba'}}>Loading movies...</div>
                 ) : movies.length === 0 ? (
-                    <div style={{textAlign: 'center', color: '#afafba'}}>No movies found. Try different search terms or filters.</div>
+                    <div style={{textAlign: 'center', color: '#afafba'}}>
+                        {browseSection === 'discover'
+                            ? 'No movies found. Try different search terms or filters.'
+                            : `No movies available in ${sectionTitle} right now.`}
+                    </div>
                 ) : (
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {movies.map((movie) => (

@@ -85,6 +85,8 @@ const getBrowseMovies = async (req, res) => {
             // Project-friendly interpretation: most recent/newest releases
             query += ` ORDER BY m.release_year DESC, m.title ASC`;
         } else if (section === 'top-rated') {
+            // Require at least one review so unrated movies do not appear in top-rated
+            query += ` HAVING COUNT(r.review_id) > 0`;
             query += ` ORDER BY AVG(CAST(r.rating AS DECIMAL(5,2))) DESC, COUNT(r.review_id) DESC, m.title ASC`;
         } else {
             query += ` ORDER BY m.title ASC`;

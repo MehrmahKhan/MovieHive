@@ -285,7 +285,7 @@ export default function MyListsPage() {
                                                 <strong>{m.title}</strong>
                                                 <div style={{ color: '#afafba', fontSize: 13 }}>{m.release_year} · {m.duration_minutes} min</div>
                                             </button>
-                                            <button onClick={() => removeMovie(selectedCollection.collection_id, m.movie_id)} style={{ color: '#ffb4b4' }}>Remove</button>
+                                                <button onClick={() => removeMovie(selectedCollection.collection_id, m.movie_id)} style={{ color: '#ffb4b4' }}>Remove</button>
                                         </div>
                                     ))}
                                 </div>

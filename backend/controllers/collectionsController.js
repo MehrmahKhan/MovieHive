@@ -6,7 +6,7 @@ const hasCollectionSharesTable = async () => {
 };
 
 const loadCollectionAccess = async (collectionId, userId) => {
-    const sharesEnabled = await hasCollectionSharesTable();
+
     const result = await new sql.Request()
         .input('collectionId', sql.Int, collectionId)
         .input('userId', sql.Int, userId)
@@ -18,12 +18,12 @@ const loadCollectionAccess = async (collectionId, userId) => {
                 owner.name AS owner_name,
                 CASE
                     WHEN c.user_id = @userId THEN 'owner'
-                    WHEN ${sharesEnabled ? `EXISTS (
+                    WHEN EXISTS (
                         SELECT 1
                         FROM Collection_Shares cs
                         WHERE cs.collection_id = c.collection_id
                           AND cs.shared_with_user_id = @userId
-                    )` : '1 = 0'} THEN 'collaborator'
+                    ) THEN 'collaborator'
                     ELSE NULL
                 END AS access_role
             FROM Collections c
@@ -275,7 +275,7 @@ const addMovieToCollection = async (req, res) => {
         }
 
         const access = await loadCollectionAccess(collectionId, parseInt(userId, 10));
-        if (!access || !access.access_role) {
+            if (!access || !access.access_role) {
             return res.status(403).json({ success: false, message: 'Not allowed to modify this collection' });
         }
 

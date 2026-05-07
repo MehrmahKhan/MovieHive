@@ -39,6 +39,7 @@ export default function ShareModal({
           autoFocus
           style={{ width: '100%', padding: '10px 12px', borderRadius: 6, marginBottom: 16, background: '#ececec', color: '#262626' }}
         />
+
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
           <button type="button" onClick={onCancel} style={{ padding: '8px 12px', borderRadius: 6, background: '#6b2f2f', color: '#fff' }}>{cancelLabel}</button>
           <button type="submit" style={{ padding: '8px 12px', borderRadius: 6, background: '#f4d320', color: '#262626', fontWeight: 600 }}>{confirmLabel}</button>

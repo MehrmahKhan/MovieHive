@@ -87,6 +87,7 @@ export default function Dashboard({user, onLogout}) {
                             <button onClick={() => setBrowseSection('upcoming')} className="transition hover:text-white">Upcoming</button>
                             <button onClick={() => setBrowseSection('top-rated')} className="transition hover:text-white">Top Rated</button>
                             <button onClick={() => navigate('/watchlist')} className="transition hover:text-white">My Watchlist</button>
+                            <button onClick={() => navigate('/lists')} className="transition hover:text-white">My Lists</button>
                             <button onClick={() => navigate('/friends')} className="transition hover:text-white">Friends</button>
                         </div>
 

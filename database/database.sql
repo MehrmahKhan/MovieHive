@@ -103,6 +103,19 @@ CREATE TABLE Collection_Movies (
     FOREIGN KEY (movie_id) REFERENCES Movies(movie_id) ON DELETE CASCADE
 );
 
+-- Collection_Shares: Grants collaboration access to non-owner users
+CREATE TABLE Collection_Shares (
+    share_id INT PRIMARY KEY IDENTITY(1,1),
+    collection_id INT NOT NULL,
+    shared_with_user_id INT NOT NULL,
+    shared_by_user_id INT NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    CONSTRAINT UQ_CollectionShare UNIQUE (collection_id, shared_with_user_id),
+    FOREIGN KEY (collection_id) REFERENCES Collections(collection_id) ON DELETE CASCADE,
+    FOREIGN KEY (shared_with_user_id) REFERENCES Users(user_id) ON DELETE NO ACTION,
+    FOREIGN KEY (shared_by_user_id) REFERENCES Users(user_id) ON DELETE NO ACTION
+);
+
 -- ============================================
 -- UNIQUE CORE FEATURE TABLES (SQL-RELATED)
 -- Mood-based watchlist cooldown recommendations

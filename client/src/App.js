@@ -10,6 +10,7 @@ import ChatWindow from './components/ChatWindow';
 import WatchlistPage from './components/WatchlistPage';
 import ProfilePage from './components/ProfilePage';
 import SettingsPage from './components/SettingsPage';
+import MyListsPage from './components/MyListsPage';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -63,6 +64,7 @@ function App() {
                         <Route path="/" element={<Dashboard user={user} onLogout={handleLogout} />} />
                         <Route path="/movie/:movieId" element={<MovieDetailPage />} />
                         <Route path="/watchlist" element={<WatchlistPage />} />
+                        <Route path="/lists" element={<MyListsPage />} />
                         <Route path="/profile" element={<ProfilePage currentUser={user} onUserUpdate={handleUserUpdate} />} />
                         <Route path="/settings" element={<SettingsPage currentUser={user} />} />
                         <Route path="/friends" element={<FriendsPage currentUser={user} />} />

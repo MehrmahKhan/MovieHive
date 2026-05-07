@@ -5,6 +5,7 @@ import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import './MovieDetailPage.css';
 import './ReviewStyles.css';
+import ListPickerModal from './ListPickerModal';
 
 // Icon components using Unicode symbols
 const ChevronLeft = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>‹</span>;
@@ -21,6 +22,10 @@ const MovieDetailPage = () => {
   const [error, setError] = useState('');
   const [inWatchlist, setInWatchlist] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const [listsLoading, setListsLoading] = useState(false);
+  const [listModalOpen, setListModalOpen] = useState(false);
+  const [availableCollections, setAvailableCollections] = useState([]);
+  const [listsMessage, setListsMessage] = useState('');
   
   // Review states
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -144,6 +149,82 @@ const MovieDetailPage = () => {
     }
   };
 
+  const handleAddToList = async () => {
+    const stored = localStorage.getItem('user');
+    if (!stored) {
+      setListsMessage('Please login to add to lists');
+      return;
+    }
+    const user = JSON.parse(stored);
+    if (!user?.id) {
+      setListsMessage('User ID missing');
+      return;
+    }
+
+    if (listsLoading) return;
+    setListsLoading(true);
+
+    try {
+      const collectionsRes = await fetch(`http://localhost:3001/api/collections/user/${user.id}`);
+      const collectionsData = await collectionsRes.json();
+      if (!collectionsData.success) {
+        setListsMessage(collectionsData.message || 'Failed to fetch lists');
+        return;
+      }
+
+      const collections = collectionsData.collections || [];
+      setAvailableCollections(collections);
+      setListModalOpen(true);
+    } catch (err) {
+      console.error('Add to list error', err);
+      setListsMessage('Network error while fetching lists');
+    } finally {
+      setListsLoading(false);
+    }
+  };
+
+  const handleListPickerConfirm = async (result) => {
+    setListModalOpen(false);
+    setListsMessage('');
+    const stored = localStorage.getItem('user');
+    if (!stored) return setListsMessage('Please login');
+    const user = JSON.parse(stored);
+    if (!user?.id) return setListsMessage('User ID missing');
+
+    try {
+      let collection = null;
+      if (result.type === 'create') {
+        const createRes = await fetch('http://localhost:3001/api/collections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, collectionName: result.name })
+        });
+        const createData = await createRes.json();
+        if (!createData.success) return setListsMessage(createData.message || 'Failed to create list');
+        collection = createData.collection;
+      } else if (result.type === 'existing') {
+        collection = result.collection;
+      }
+
+      if (!collection) return setListsMessage('No collection selected');
+
+      const addRes = await fetch(`http://localhost:3001/api/collections/${collection.collection_id}/movies`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, movieId: parseInt(movieId) })
+      });
+      const addData = await addRes.json();
+      if (addData.success) {
+        setListsMessage(`Added to list: ${collection.collection_name}`);
+      } else {
+        setListsMessage(addData.message || 'Failed to add movie to list');
+      }
+    } catch (err) {
+      console.error('Add to list error', err);
+      setListsMessage('Network error while adding to list');
+    }
+  };
+
   const handleReviewSubmitted = (newReview) => {
     setUserReview(newReview);
     setShowReviewForm(false);
@@ -237,11 +318,21 @@ const MovieDetailPage = () => {
             >
               {watchlistLoading ? (inWatchlist ? 'Removing...' : 'Adding...') : (inWatchlist ? 'In Watchlist' : 'Add to Watchlist')}
             </button>
+            <button 
+              onClick={handleAddToList}
+              className="btn-rate"
+              disabled={listsLoading}
+            >
+              {listsLoading ? 'Adding to List...' : 'Add to List'}
+            </button>
             <button className="btn-rate">
               <Star size={18} />
               Rate Movie
             </button>
           </div>
+          {listsMessage ? <div style={{ color: '#ffd56d', marginTop: 8 }}>{listsMessage}</div> : null}
+
+          <ListPickerModal open={listModalOpen} collections={availableCollections} onCancel={() => setListModalOpen(false)} onConfirm={handleListPickerConfirm} />
         </div>
       </div>
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 
 export default function Dashboard({user, onLogout}) {
     const navigate = useNavigate();
-    const [showUserMenu, setShowUserMenu] = useState(false);
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
@@ -76,45 +76,7 @@ export default function Dashboard({user, onLogout}) {
     return (
         <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
             {/* Navbar */}
-            <nav className="sticky top-0 z-50 backdrop-blur-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.7)', borderBottomColor: '#3b3c45', borderBottomWidth: '1px'}}>
-                <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-light tracking-tight">MovieHive</h1>
-
-                    <div className="flex items-center gap-8">
-                            <div className="hidden md:flex gap-8 text-sm font-light" style={{color: '#c7c7cc'}}>
-                            <button onClick={() => setBrowseSection('discover')} className="transition hover:text-white">Discover</button>
-                            <button onClick={() => setBrowseSection('trending')} className="transition hover:text-white">Trending</button>
-                            <button onClick={() => setBrowseSection('upcoming')} className="transition hover:text-white">Upcoming</button>
-                            <button onClick={() => setBrowseSection('top-rated')} className="transition hover:text-white">Top Rated</button>
-                            <button onClick={() => navigate('/watchlist')} className="transition hover:text-white">My Watchlist</button>
-                            <button onClick={() => navigate('/lists')} className="transition hover:text-white">My Lists</button>
-                            <button onClick={() => navigate('/friends')} className="transition hover:text-white">Friends</button>
-                        </div>
-
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowUserMenu(!showUserMenu)}
-                                className="w-10 h-10 rounded-full font-medium text-sm transition flex items-center justify-center"
-                                style={{backgroundColor: 'rgba(244, 211, 32, 0.1)', borderColor: '#f4d320', borderWidth: '1px', color: '#f4d320'}}
-                            >
-                                {user?.name?.charAt(0).toUpperCase() || 'U'}
-                            </button>
-
-                            {showUserMenu && (
-                                <div className="absolute right-0 mt-3 w-48 rounded-sm shadow-xl overflow-hidden" style={{backgroundColor: '#1d1f2b', borderColor: '#3b3c45', borderWidth: '1px'}}>
-                                    <div className="px-4 py-3" style={{borderBottomColor: '#3b3c45', borderBottomWidth: '1px'}}>
-                                        <p className="font-light text-sm" style={{color: '#f4f4f4'}}>{user?.name || 'User'}</p>
-                                        <p className="text-xs" style={{color: '#afafba'}}>{user?.email || 'email@example.com'}</p>
-                                    </div>
-                                    <button onClick={() => navigate('/profile')} className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Profile</button>
-                                    <button onClick={() => navigate('/settings')} className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Settings</button>
-                                    <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm transition border-t font-light" style={{color: '#c7c7cc', borderTopColor: '#3b3c45'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Sign Out</button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Navbar user={user} onLogout={onLogout} activeBrowseSection={browseSection} onBrowseSectionChange={setBrowseSection} />
 
             {/* Hero Section */}
             <section className="max-w-7xl mx-auto px-8 py-16">

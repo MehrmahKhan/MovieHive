@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
+import Navbar from './Navbar';
 import ConfirmModal from './ConfirmModal';
 import ShareModal from './ShareModal';
 
@@ -191,12 +192,22 @@ export default function MyListsPage() {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('/');
+    };
+
     if (loading) {
         return <div style={{ padding: 24, color: '#f4f4f4' }}>Loading your lists...</div>;
     }
 
+    if (!user) {
+        return <div style={{ padding: 24, color: '#f4f4f4' }}>Loading...</div>;
+    }
+
     return (
         <>
+        <Navbar user={user} onLogout={handleLogout} />
         <div className="min-h-screen text-white" style={{ background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)' }}>
             <div style={{ padding: 20 }}>
                 <BackButton label={'Back to Movies'} sticky={false} />

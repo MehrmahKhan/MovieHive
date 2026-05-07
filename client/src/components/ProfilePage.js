@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
+import Navbar from './Navbar';
 
 export default function ProfilePage({ currentUser, onUserUpdate }) {
+    const navigate = useNavigate();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState('');
+    const [displayUser, setDisplayUser] = useState(currentUser);
 
     useEffect(() => {
         const load = async () => {
@@ -45,6 +49,7 @@ export default function ProfilePage({ currentUser, onUserUpdate }) {
             if (data.success) {
                 const updatedUser = { ...currentUser, name, email };
                 onUserUpdate(updatedUser);
+                setDisplayUser(updatedUser);
                 setMessage('Profile saved successfully');
             } else {
                 setMessage(data.message || 'Failed to save profile');
@@ -56,8 +61,14 @@ export default function ProfilePage({ currentUser, onUserUpdate }) {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('/');
+    };
+
     return (
         <div className="min-h-screen text-white" style={{ background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)' }}>
+            <Navbar user={displayUser || currentUser} onLogout={handleLogout} />
             <div style={{ padding: 20 }}>
                 <BackButton label={'Back to Movies'} sticky={false} />
             </div>

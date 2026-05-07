@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
+import Navbar from './Navbar';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import './MovieDetailPage.css';
@@ -232,16 +233,26 @@ const MovieDetailPage = () => {
     setReviewsRefresh(prev => prev + 1);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
   if (loading) {
     return (
+      <>
+      <Navbar user={currentUser} onLogout={handleLogout} />
       <div className="movie-detail-container">
         <div className="loading-spinner">Loading movie details...</div>
       </div>
+      </>
     );
   }
 
   if (error || !movie) {
     return (
+      <>
+      <Navbar user={currentUser} onLogout={handleLogout} />
       <div className="movie-detail-container">
         <button 
           onClick={() => navigate(-1)}
@@ -254,6 +265,7 @@ const MovieDetailPage = () => {
           {error || 'Movie not found'}
         </div>
       </div>
+      </>
     );
   }
 
@@ -272,6 +284,8 @@ const MovieDetailPage = () => {
   const totalForDistribution = movieReviews.length || reviewCount;
 
   return (
+    <>
+    <Navbar user={currentUser} onLogout={handleLogout} />
     <div className="movie-detail-container">
       {/* Back Button */}
       <div style={{ marginBottom: 12 }}>
@@ -508,6 +522,7 @@ const MovieDetailPage = () => {
         </aside>
       </div>
     </div>
+    </>
   );
 };
 

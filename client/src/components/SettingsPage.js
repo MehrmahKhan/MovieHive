@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
+import Navbar from './Navbar';
 
 export default function SettingsPage({ currentUser }) {
+    const navigate = useNavigate();
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -45,8 +48,14 @@ export default function SettingsPage({ currentUser }) {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('/');
+    };
+
     return (
         <div className="min-h-screen text-white" style={{ background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)' }}>
+            <Navbar user={currentUser} onLogout={handleLogout} />
             <div style={{ padding: 20 }}>
                 <BackButton label={'Back to Movies'} sticky={false} />
             </div>

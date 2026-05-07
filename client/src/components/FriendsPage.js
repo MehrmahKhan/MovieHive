@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 import './FriendsPage.css';
 
 const FriendsPage = ({ currentUser }) => {
@@ -161,11 +162,18 @@ const FriendsPage = ({ currentUser }) => {
         navigate(`/chat/${friendId}`, { state: { friendName } });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('/');
+    };
+
     if (!user) {
         return <div className="friends-page"><p>Loading...</p></div>;
     }
 
     return (
+        <>
+        <Navbar user={user} onLogout={handleLogout} />
         <div className="friends-page">
             <div className="friends-container">
                 {/* Header */}
@@ -274,6 +282,7 @@ const FriendsPage = ({ currentUser }) => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

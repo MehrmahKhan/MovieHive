@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 import './ChatWindow.css';
 
 const ChatWindow = ({ currentUser }) => {
@@ -122,11 +123,18 @@ const ChatWindow = ({ currentUser }) => {
         return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('/');
+    };
+
     if (!user) {
         return <div className="chat-window"><p>Loading...</p></div>;
     }
 
     return (
+        <>
+        <Navbar user={user} onLogout={handleLogout} />
         <div className="chat-window">
             <div className="chat-container">
                 {/* Header */}
@@ -174,6 +182,7 @@ const ChatWindow = ({ currentUser }) => {
                 </form>
             </div>
         </div>
+        </>
     );
 };
 

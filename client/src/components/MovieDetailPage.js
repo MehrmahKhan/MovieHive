@@ -517,7 +517,7 @@ const MovieDetailPage = () => {
               {/* TODO: Phase 4 - Implement recommendation algorithm */}
               <div className="similar-placeholder">
                 <p>Recommended movies based on genre & ratings</p>
-                <small>Similarity algorithm coming in Phase 4</small>
+                <small>Similar Movies</small>
               </div>
             </div>
           </section>
@@ -547,28 +547,6 @@ const MovieDetailPage = () => {
             <div className="info-item">
               <span className="label">Total Reviews:</span>
               <span className="value">{reviewCount}</span>
-            </div>
-          </div>
-
-          {/* Status Card */}
-          <div className="sidebar-card status-card">
-            <h3>Development Status</h3>
-            <div className="status-list">
-              <div className="status-item completed">
-                [DONE] Movie Details Display
-              </div>
-              <div className="status-item completed">
-                [DONE] Ratings & Reviews Section
-              </div>
-              <div className="status-item completed">
-                [DONE] Phase 3: User Reviews
-              </div>
-              <div className="status-item pending">
-                [TODO] Phase 4: Similar Movies
-              </div>
-              <div className="status-item completed">
-                [DONE] Phase 4: Cast Details
-              </div>
             </div>
           </div>
         </aside>

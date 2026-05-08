@@ -153,8 +153,7 @@ export default function AdminMovieManagement({ adminUser, onClose }) {
             setIsSubmitting(false);
         }
     };
-        }
-    };
+    
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" style={{backgroundColor: 'rgba(0,0,0,0.7)'}}>

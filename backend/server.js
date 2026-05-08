@@ -9,6 +9,7 @@ const friendsRoutes = require('./routes/friendsRoutes');
 const messagesRoutes = require('./routes/messagesRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const collectionsRoutes = require('./routes/collectionsRoutes');
 const forumRoutes = require('./routes/forumRoutes');
 const initializeDatabase = require('./utils/initializeDatabase');
@@ -78,6 +79,9 @@ app.use('/api/watchlist', watchlistRoutes);
 
 // Use profile routes
 app.use('/api/profile', profileRoutes);
+
+// Use admin routes
+app.use('/api/admin', adminRoutes);
 
 // Use collections routes
 app.use('/api/collections', collectionsRoutes);

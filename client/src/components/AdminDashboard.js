@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import AddMovieForm from './AddMovieForm';
+import AdminUserManagement from './AdminUserManagement';
 
 export default function AdminDashboard({user, onLogout}) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showAddMovieForm, setShowAddMovieForm] = useState(false);
+    const [showUserManagement, setShowUserManagement] = useState(false);
 
     return (
         <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
@@ -34,7 +36,15 @@ export default function AdminDashboard({user, onLogout}) {
                                         <p className="font-light text-sm" style={{color: '#f4f4f4'}}>{user?.name || 'Admin'}</p>
                                         <p className="text-xs" style={{color: '#afafba'}}>Admin User</p>
                                     </div>
-                                    <button className="w-full text-left block px-4 py-2 text-sm transition font-light" style={{color: '#c7c7cc'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Admin Settings</button>
+                                    <button
+                                        onClick={() => setShowUserManagement(true)}
+                                        className="w-full text-left block px-4 py-2 text-sm transition font-light"
+                                        style={{color: '#c7c7cc'}}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'}
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                    >
+                                        Admin Settings
+                                    </button>
                                     <button onClick={onLogout} className="w-full text-left px-4 py-2 text-sm transition border-t font-light" style={{color: '#c7c7cc', borderTopColor: '#3b3c45'}} onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}>Sign Out</button>
                                 </div>
                             )}
@@ -82,7 +92,7 @@ export default function AdminDashboard({user, onLogout}) {
             <section className="max-w-7xl mx-auto px-8 py-12" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
                 <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Admin Actions</h3>
                 <div className="grid sm:grid-cols-2 gap-6">
-                    <button className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                    <button onClick={() => setShowUserManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
                         <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Manage Users</h4>
                         <p className="text-sm" style={{color: '#afafba'}}>View, edit, or remove user accounts and permissions</p>
                     </button>
@@ -115,6 +125,13 @@ export default function AdminDashboard({user, onLogout}) {
                         // Optional: refresh movie list or show success message
                     }}
                     onClose={() => setShowAddMovieForm(false)}
+                />
+            )}
+
+            {showUserManagement && (
+                <AdminUserManagement
+                    adminUser={user}
+                    onClose={() => setShowUserManagement(false)}
                 />
             )}
         </div>

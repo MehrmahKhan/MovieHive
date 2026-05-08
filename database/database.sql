@@ -27,6 +27,7 @@ CREATE TABLE Movies (
     description VARCHAR(1000),
     release_year INT CHECK (release_year >= 1888),
     duration_minutes INT CHECK (duration_minutes > 0),
+    is_upcoming BIT NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT GETDATE()
 );
 

@@ -273,6 +273,7 @@ const MovieDetailPage = () => {
   const genres = movie.genres ? movie.genres.split(', ') : [];
   const avgRating = movie.avg_rating ? parseFloat(movie.avg_rating).toFixed(1) : 'N/A';
   const reviewCount = movie.review_count || 0;
+  const castMembers = Array.isArray(movie.cast) ? movie.cast : [];
   const displayedReviewCount = movieReviews.length > 0 ? movieReviews.length : reviewCount;
   const reviewTotals = movieReviews.reduce((counts, review) => {
     const rating = Number(review.rating);
@@ -367,13 +368,31 @@ const MovieDetailPage = () => {
               <Users size={20} />
               Cast & Crew
             </h2>
-            <div className="cast-grid">
-              {/* TODO: Phase 2.5 - Fetch cast from Movie_Cast table */}
-              <div className="cast-placeholder">
-                <p>Cast information coming soon...</p>
-                <small>Backend data available in Movie_Cast table</small>
+            {castMembers.length > 0 ? (
+              <div className="cast-grid">
+                {castMembers.map((member) => (
+                  <div key={member.person_id} className="cast-card">
+                    <div className="cast-avatar">
+                      {String(member.full_name || '')
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((part) => part.charAt(0).toUpperCase())
+                        .join('') || 'C'}
+                    </div>
+                    <div className="cast-name">{member.full_name}</div>
+                    <div className="cast-role">{member.role_name || 'Cast Member'}</div>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="cast-grid">
+                <div className="cast-placeholder">
+                  <p>Cast information coming soon...</p>
+                  <small>Backend data available in Movie_Cast table</small>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Reviews Section */}
@@ -514,8 +533,8 @@ const MovieDetailPage = () => {
               <div className="status-item pending">
                 [TODO] Phase 4: Similar Movies
               </div>
-              <div className="status-item pending">
-                [TODO] Phase 4: Cast Details
+              <div className="status-item completed">
+                [DONE] Phase 4: Cast Details
               </div>
             </div>
           </div>

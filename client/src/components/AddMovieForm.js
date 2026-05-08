@@ -6,6 +6,8 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
     const [release_year, setReleaseYear] = useState(new Date().getFullYear());
     const [duration_minutes, setDurationMinutes] = useState('');
     const [selectedGenres, setSelectedGenres] = useState([]);
+    const [castText, setCastText] = useState('');
+    const [isUpcoming, setIsUpcoming] = useState(false);
     const [genres, setGenres] = useState([]);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -39,6 +41,12 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
         }
         if (selectedGenres.length === 0) errors.genres = 'Select at least one genre';
 
+        const castLines = castText.split('\n').map((line) => line.trim()).filter(Boolean);
+        const invalidCastLine = castLines.find((line) => !line.match(/^.+\s+as\s+.+$/i));
+        if (castLines.length > 0 && invalidCastLine) {
+            errors.castText = 'Use one cast member per line in the format: Name as Role';
+        }
+
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
     };
@@ -71,7 +79,9 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
                     description,
                     release_year: parseInt(release_year),
                     duration_minutes: parseInt(duration_minutes),
-                    genreIds: selectedGenres
+                    genreIds: selectedGenres,
+                    castMembers: castText,
+                    isUpcoming
                 }),
             });
 
@@ -87,6 +97,8 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
                 setReleaseYear(new Date().getFullYear());
                 setDurationMinutes('');
                 setSelectedGenres([]);
+                setCastText('');
+                setIsUpcoming(false);
                 
                 if (onMovieAdded) {
                     onMovieAdded();
@@ -108,8 +120,17 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-6" style={{backgroundColor: '#1d1f2b', borderColor: '#3b3c45', borderWidth: '1px'}}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 overflow-y-auto py-6">
+            <div
+                className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 p-6"
+                style={{
+                    backgroundColor: '#1d1f2b',
+                    borderColor: '#3b3c45',
+                    borderWidth: '1px',
+                    maxHeight: '90vh',
+                    overflowY: 'auto'
+                }}
+            >
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-light" style={{color: '#f4d320'}}>Add New Movie</h2>
                     <button
@@ -216,6 +237,39 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
                             ))}
                         </div>
                         {fieldErrors.genres && <p className="text-xs mt-1" style={{color: '#ff8f8f'}}>{fieldErrors.genres}</p>}
+                    </div>
+
+                    {/* Upcoming */}
+                    <div className="mb-6 flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            checked={isUpcoming}
+                            onChange={(e) => setIsUpcoming(e.target.checked)}
+                            id="isUpcoming"
+                        />
+                        <label htmlFor="isUpcoming" className="text-sm" style={{color: '#c7c7cc'}}>
+                            Is this an upcoming movie?
+                        </label>
+                    </div>
+
+                    {/* Cast */}
+                    <div className="mb-6">
+                        <label className="block text-sm mb-2" style={{color: '#c7c7cc'}}>Cast (optional)</label>
+                        <textarea
+                            value={castText}
+                            onChange={(e) => setCastText(e.target.value)}
+                            className="w-full px-4 py-2 rounded"
+                            style={{
+                                backgroundColor: '#ececec',
+                                borderColor: fieldErrors.castText ? '#ff8f8f' : '#3b3c45',
+                                borderWidth: '2px',
+                                color: '#262626'
+                            }}
+                            placeholder={'Leonardo DiCaprio as Cobb\nMarion Cotillard as Mal'}
+                            rows="4"
+                        />
+                        <p className="text-xs mt-1" style={{color: '#afafba'}}>One person per line. Use <span style={{color: '#f4d320'}}>Name as Role</span>.</p>
+                        {fieldErrors.castText && <p className="text-xs mt-1" style={{color: '#ff8f8f'}}>{fieldErrors.castText}</p>}
                     </div>
 
                     {/* Messages */}

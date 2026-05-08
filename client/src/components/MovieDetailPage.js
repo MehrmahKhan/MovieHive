@@ -274,6 +274,7 @@ const MovieDetailPage = () => {
   const avgRating = movie.avg_rating ? parseFloat(movie.avg_rating).toFixed(1) : 'N/A';
   const reviewCount = movie.review_count || 0;
   const castMembers = Array.isArray(movie.cast) ? movie.cast : [];
+  const crewMembers = Array.isArray(movie.crew) ? movie.crew : [];
   const displayedReviewCount = movieReviews.length > 0 ? movieReviews.length : reviewCount;
   const reviewTotals = movieReviews.reduce((counts, review) => {
     const rating = Number(review.rating);
@@ -311,7 +312,7 @@ const MovieDetailPage = () => {
             </span>
             <span className="rating">
               <Star size={16} className="star-icon" />
-              {avgRating}/10 ({reviewCount} reviews)
+              {avgRating}/5 ({reviewCount} reviews)
             </span>
           </div>
 
@@ -368,31 +369,63 @@ const MovieDetailPage = () => {
               <Users size={20} />
               Cast & Crew
             </h2>
-            {castMembers.length > 0 ? (
-              <div className="cast-grid">
-                {castMembers.map((member) => (
-                  <div key={member.person_id} className="cast-card">
-                    <div className="cast-avatar">
-                      {String(member.full_name || '')
-                        .split(' ')
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((part) => part.charAt(0).toUpperCase())
-                        .join('') || 'C'}
+
+            {/* Crew Section */}
+            {crewMembers.length > 0 && (
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#f4d320', fontWeight: '600' }}>
+                  ☆ Crew
+                </h3>
+                <div className="cast-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
+                  {crewMembers.map((member) => (
+                    <div key={`${member.person_id}-${member.role_name}`} className="cast-card">
+                      <div className="cast-avatar">
+                        {String(member.full_name || '')
+                          .split(' ')
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((part) => part.charAt(0).toUpperCase())
+                          .join('') || 'C'}
+                      </div>
+                      <div className="cast-name">{member.full_name}</div>
+                      <div className="cast-role" style={{ color: '#f4d320', fontWeight: '500' }}>{member.role_name}</div>
                     </div>
-                    <div className="cast-name">{member.full_name}</div>
-                    <div className="cast-role">{member.role_name || 'Cast Member'}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="cast-grid">
-                <div className="cast-placeholder">
-                  <p>Cast information coming soon...</p>
-                  <small>Backend data available in Movie_Cast table</small>
+                  ))}
                 </div>
               </div>
             )}
+
+            {/* Cast Section */}
+            <div>
+              <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#f4f4f4', fontWeight: '600' }}>
+                Cast
+              </h3>
+              {castMembers.length > 0 ? (
+                <div className="cast-grid">
+                  {castMembers.map((member) => (
+                    <div key={member.person_id} className="cast-card">
+                      <div className="cast-avatar">
+                        {String(member.full_name || '')
+                          .split(' ')
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((part) => part.charAt(0).toUpperCase())
+                          .join('') || 'C'}
+                      </div>
+                      <div className="cast-name">{member.full_name}</div>
+                      <div className="cast-role">{member.role_name || 'Cast Member'}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="cast-grid">
+                  <div className="cast-placeholder">
+                    <p>Cast information coming soon...</p>
+                    <small>Backend data available in Movie_Cast table</small>
+                  </div>
+                </div>
+              )}
+            </div>
           </section>
 
           {/* Reviews Section */}
@@ -408,7 +441,7 @@ const MovieDetailPage = () => {
                     <Star
                       key={i}
                       size={16}
-                      className={i < Math.round(avgRating / 2) ? 'filled' : 'empty'}
+                      className={i < Math.round(parseFloat(avgRating)) ? 'filled' : 'empty'}
                     />
                   ))}
                 </div>
@@ -509,7 +542,7 @@ const MovieDetailPage = () => {
             </div>
             <div className="info-item">
               <span className="label">Average Rating:</span>
-              <span className="value rating-value">{avgRating}/10</span>
+              <span className="value rating-value">{avgRating}/5</span>
             </div>
             <div className="info-item">
               <span className="label">Total Reviews:</span>

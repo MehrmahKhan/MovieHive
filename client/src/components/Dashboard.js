@@ -9,6 +9,9 @@ export default function Dashboard({user, onLogout}) {
     const [errorMessage, setErrorMessage] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedGenre, setSelectedGenre] = useState('');
+    const [minRating, setMinRating] = useState('');
+    const [minYear, setMinYear] = useState('');
+    const [maxYear, setMaxYear] = useState('');
     const [genres, setGenres] = useState([]);
     const [browseSection, setBrowseSection] = useState('discover');
 
@@ -40,6 +43,9 @@ export default function Dashboard({user, onLogout}) {
                 } else {
                     if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}&`;
                     if (selectedGenre) url += `genre=${encodeURIComponent(selectedGenre)}&`;
+                    if (minRating) url += `minRating=${encodeURIComponent(minRating)}&`;
+                    if (minYear) url += `minYear=${encodeURIComponent(minYear)}&`;
+                    if (maxYear) url += `maxYear=${encodeURIComponent(maxYear)}&`;
                 }
                 
                 const res = await fetch(url);
@@ -62,7 +68,7 @@ export default function Dashboard({user, onLogout}) {
         // Debounce search
         const timer = setTimeout(fetchMovies, 300);
         return () => clearTimeout(timer);
-    }, [searchTerm, selectedGenre, browseSection]);
+    }, [searchTerm, selectedGenre, minRating, minYear, maxYear, browseSection]);
 
     const sectionTitle =
         browseSection === 'trending'
@@ -86,7 +92,7 @@ export default function Dashboard({user, onLogout}) {
 
             <section className="moviehive-shell pt-0">
                 <div className="moviehive-panel">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <input
                             type="text"
                             placeholder="Search movies by title..."
@@ -108,6 +114,31 @@ export default function Dashboard({user, onLogout}) {
                                 <option key={g.genre_id} value={g.genre_name}>{g.genre_name}</option>
                             ))}
                         </select>
+                        <select
+                            value={minRating}
+                            onChange={(e) => setMinRating(e.target.value)}
+                            className="px-4 py-3 rounded-lg"
+                            disabled={browseSection !== 'discover'}
+                            style={{ backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626' }}
+                        >
+                            <option value="">Min Rating</option>
+                            <option value="1">1+ Stars</option>
+                            <option value="2">2+ Stars</option>
+                            <option value="3">3+ Stars</option>
+                            <option value="4">4+ Stars</option>
+                            <option value="5">5 Stars</option>
+                        </select>
+                        <input
+                            type="number"
+                            placeholder="Release Year"
+                            value={minYear}
+                            onChange={(e) => setMinYear(e.target.value)}
+                            className="px-4 py-3 rounded-lg"
+                            disabled={browseSection !== 'discover'}
+                            min="1900"
+                            max={new Date().getFullYear()}
+                            style={{ backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626' }}
+                        />
                     </div>
                 </div>
             </section>

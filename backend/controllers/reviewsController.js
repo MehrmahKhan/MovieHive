@@ -240,10 +240,223 @@ const deleteReview = async (req, res) => {
     }
 };
 
+// Get all reviews for admin management
+const getAllReviewsAdmin = async (req, res) => {
+    try {
+        const { adminUserId } = req.query;
+
+        // Verify admin
+        const adminResult = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!adminResult.recordset.length || adminResult.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .query(`
+                SELECT 
+                    r.review_id,
+                    r.user_id,
+                    u.name as username,
+                    r.movie_id,
+                    m.title as movie_title,
+                    r.rating,
+                    r.review_text,
+                    r.review_date,
+                    r.is_flagged,
+                    r.flag_reason,
+                    r.flagged_by,
+                    admin.name as flagged_by_admin,
+                    r.flagged_date
+                FROM Reviews r
+                LEFT JOIN Users u ON r.user_id = u.user_id
+                LEFT JOIN Movies m ON r.movie_id = m.movie_id
+                LEFT JOIN Users admin ON r.flagged_by = admin.user_id
+                ORDER BY r.is_flagged DESC, r.review_date DESC
+            `);
+
+        res.json({ success: true, reviews: result.recordset || [] });
+    } catch (err) {
+        console.error('Error fetching admin reviews:', err);
+        res.status(500).json({ success: false, message: 'Failed to fetch reviews' });
+    }
+};
+
+// Flag review as inappropriate (admin only)
+const flagReview = async (req, res) => {
+    try {
+        const { reviewId } = req.params;
+        const { adminUserId, reason } = req.body;
+
+        // Verify admin
+        const adminResult = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!adminResult.recordset.length || adminResult.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        if (!reviewId) {
+            return res.status(400).json({ success: false, message: 'Review ID is required' });
+        }
+
+        const pool = await sql.connect(config);
+        
+        await pool.request()
+            .input('reviewId', sql.Int, reviewId)
+            .input('flagReason', sql.VarChar, reason || 'Flagged by admin')
+            .input('adminUserId', sql.Int, adminUserId)
+            .query(`
+                UPDATE Reviews
+                SET is_flagged = 1,
+                    flag_reason = @flagReason,
+                    flagged_by = @adminUserId,
+                    flagged_date = GETDATE()
+                WHERE review_id = @reviewId
+            `);
+
+        // Fetch updated review
+        const updated = await pool.request()
+            .input('reviewId', sql.Int, reviewId)
+            .query(`
+                SELECT 
+                    r.review_id,
+                    r.user_id,
+                    u.name as username,
+                    r.movie_id,
+                    m.title as movie_title,
+                    r.rating,
+                    r.review_text,
+                    r.review_date,
+                    r.is_flagged,
+                    r.flag_reason,
+                    r.flagged_by,
+                    admin.name as flagged_by_admin,
+                    r.flagged_date
+                FROM Reviews r
+                LEFT JOIN Users u ON r.user_id = u.user_id
+                LEFT JOIN Movies m ON r.movie_id = m.movie_id
+                LEFT JOIN Users admin ON r.flagged_by = admin.user_id
+                WHERE r.review_id = @reviewId
+            `);
+
+        res.json({
+            success: true,
+            message: 'Review flagged successfully',
+            review: updated.recordset[0]
+        });
+    } catch (err) {
+        console.error('Error flagging review:', err);
+        res.status(500).json({ success: false, message: 'Failed to flag review' });
+    }
+};
+
+// Unflag review (admin only)
+const unflagReview = async (req, res) => {
+    try {
+        const { reviewId } = req.params;
+        const { adminUserId } = req.body;
+
+        // Verify admin
+        const adminResult = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!adminResult.recordset.length || adminResult.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        if (!reviewId) {
+            return res.status(400).json({ success: false, message: 'Review ID is required' });
+        }
+
+        const pool = await sql.connect(config);
+        
+        await pool.request()
+            .input('reviewId', sql.Int, reviewId)
+            .query(`
+                UPDATE Reviews
+                SET is_flagged = 0,
+                    flag_reason = NULL,
+                    flagged_by = NULL,
+                    flagged_date = NULL
+                WHERE review_id = @reviewId
+            `);
+
+        // Fetch updated review
+        const updated = await pool.request()
+            .input('reviewId', sql.Int, reviewId)
+            .query(`
+                SELECT 
+                    review_id,
+                    user_id,
+                    movie_id,
+                    rating,
+                    review_text,
+                    review_date,
+                    is_flagged
+                FROM Reviews
+                WHERE review_id = @reviewId
+            `);
+
+        res.json({
+            success: true,
+            message: 'Review unflagged successfully',
+            review: updated.recordset[0]
+        });
+    } catch (err) {
+        console.error('Error unflagging review:', err);
+        res.status(500).json({ success: false, message: 'Failed to unflag review' });
+    }
+};
+
+// Delete review (admin can delete flagged reviews)
+const adminDeleteReview = async (req, res) => {
+    try {
+        const { reviewId } = req.params;
+        const { adminUserId } = req.query;
+
+        // Verify admin
+        const adminResult = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!adminResult.recordset.length || adminResult.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        if (!reviewId) {
+            return res.status(400).json({ success: false, message: 'Review ID is required' });
+        }
+
+        const pool = await sql.connect(config);
+        
+        await pool.request()
+            .input('reviewId', sql.Int, reviewId)
+            .query(`DELETE FROM Reviews WHERE review_id = @reviewId`);
+
+        res.json({
+            success: true,
+            message: 'Review deleted successfully'
+        });
+    } catch (err) {
+        console.error('Error deleting review:', err);
+        res.status(500).json({ success: false, message: 'Failed to delete review' });
+    }
+};
+
 module.exports = {
     getMovieReviews,
     getUserMovieReview,
     addReview,
     updateReview,
-    deleteReview
+    deleteReview,
+    getAllReviewsAdmin,
+    flagReview,
+    unflagReview,
+    adminDeleteReview
 };

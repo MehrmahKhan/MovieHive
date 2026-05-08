@@ -3,7 +3,7 @@ const sql = require('mssql');
 // GET all movies with filters
 const getMovies = async (req, res) => {
     try {
-        const { search, genre, minRating } = req.query;
+        const { search, genre, minRating, maxRating, minYear, maxYear } = req.query;
         let query = `
             SELECT
                 m.movie_id,
@@ -34,11 +34,31 @@ const getMovies = async (req, res) => {
             params.push({ name: 'genre', value: genre });
         }
 
+        if (minYear) {
+            query += ` AND m.release_year >= @minYear`;
+            params.push({ name: 'minYear', value: parseInt(minYear) });
+        }
+
+        if (maxYear) {
+            query += ` AND m.release_year <= @maxYear`;
+            params.push({ name: 'maxYear', value: parseInt(maxYear) });
+        }
+
         query += ` GROUP BY m.movie_id, m.title, m.description, m.release_year, m.duration_minutes, m.is_upcoming`;
 
+        let havingConditions = [];
         if (minRating) {
-            query += ` HAVING AVG(CAST(r.rating AS DECIMAL(5,2))) >= @minRating`;
+            havingConditions.push(`AVG(CAST(r.rating AS DECIMAL(5,2))) >= @minRating`);
             params.push({ name: 'minRating', value: parseFloat(minRating) });
+        }
+
+        if (maxRating) {
+            havingConditions.push(`AVG(CAST(r.rating AS DECIMAL(5,2))) <= @maxRating`);
+            params.push({ name: 'maxRating', value: parseFloat(maxRating) });
+        }
+
+        if (havingConditions.length > 0) {
+            query += ` HAVING ` + havingConditions.join(' AND ');
         }
 
         query += ` ORDER BY m.title`;
@@ -165,12 +185,27 @@ const getMovieById = async (req, res) => {
                 mc.role_name
             FROM Movie_Cast mc
             INNER JOIN Persons p ON p.person_id = mc.person_id
-            WHERE mc.movie_id = @MovieId
+            WHERE mc.movie_id = @MovieId AND mc.role_name NOT IN ('Director', 'Producer', 'Writer', 'Cinematographer')
             ORDER BY p.full_name ASC
+        `);
+
+        const crewRequest = new sql.Request();
+        crewRequest.input('MovieId', sql.Int, movieId);
+        const crewResult = await crewRequest.query(`
+            SELECT
+                mc.person_id,
+                p.full_name,
+                p.birth_date,
+                mc.role_name
+            FROM Movie_Cast mc
+            INNER JOIN Persons p ON p.person_id = mc.person_id
+            WHERE mc.movie_id = @MovieId AND mc.role_name IN ('Director', 'Producer', 'Writer', 'Cinematographer')
+            ORDER BY mc.role_name DESC, p.full_name ASC
         `);
 
         const movie = result.recordset[0];
         movie.cast = castResult.recordset || [];
+        movie.crew = crewResult.recordset || [];
 
         res.json({ success: true, movie });
     } catch (err) {
@@ -333,4 +368,146 @@ const addMovie = async (req, res) => {
     }
 };
 
-module.exports = { getMovies, getBrowseMovies, getMovieById, getGenres, addMovie };
+// PUT - Update existing movie (admin only)
+const updateMovie = async (req, res) => {
+    try {
+        const { movieId } = req.params;
+        const { adminUserId, title, description, release_year, duration_minutes, genreIds, isUpcoming } = req.body;
+
+        // Verify admin
+        const admin = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!admin.recordset.length || admin.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        if (!movieId || !title || !release_year || !duration_minutes) {
+            return res.status(400).json({ success: false, message: 'Movie ID, title, release year, and duration are required' });
+        }
+
+        const normalizedIsUpcoming = isUpcoming === true || isUpcoming === 'true' || isUpcoming === 1 || isUpcoming === '1';
+
+        // Update movie details
+        await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .input('Title', sql.VarChar, title.trim())
+            .input('Description', sql.VarChar, description ? description.trim() : null)
+            .input('ReleaseYear', sql.Int, parseInt(release_year))
+            .input('DurationMinutes', sql.Int, parseInt(duration_minutes))
+            .input('IsUpcoming', sql.Bit, normalizedIsUpcoming ? 1 : 0)
+            .query(`
+                UPDATE Movies
+                SET title = @Title,
+                    description = @Description,
+                    release_year = @ReleaseYear,
+                    duration_minutes = @DurationMinutes,
+                    is_upcoming = @IsUpcoming
+                WHERE movie_id = @MovieId
+            `);
+
+        // Update genres if provided
+        if (genreIds && Array.isArray(genreIds) && genreIds.length > 0) {
+            // Delete existing genre links
+            await new sql.Request()
+                .input('MovieId', sql.Int, movieId)
+                .query('DELETE FROM Movie_Genres WHERE movie_id = @MovieId');
+
+            // Insert new genre links
+            for (const genreId of genreIds) {
+                await new sql.Request()
+                    .input('MovieId', sql.Int, movieId)
+                    .input('GenreId', sql.Int, parseInt(genreId))
+                    .query('INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (@MovieId, @GenreId)');
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Movie updated successfully',
+            movie: {
+                movie_id: movieId,
+                title,
+                description,
+                release_year,
+                duration_minutes,
+                is_upcoming: normalizedIsUpcoming
+            }
+        });
+    } catch (err) {
+        console.error('✗ Update movie error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+};
+
+// DELETE - Delete movie (admin only)
+const deleteMovie = async (req, res) => {
+    try {
+        const { movieId } = req.params;
+        const { adminUserId } = req.query;
+
+        // Verify admin
+        const admin = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!admin.recordset.length || admin.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        if (!movieId) {
+            return res.status(400).json({ success: false, message: 'Movie ID is required' });
+        }
+
+        // Check if movie exists
+        const movie = await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .query('SELECT movie_id FROM Movies WHERE movie_id = @MovieId');
+
+        if (!movie.recordset.length) {
+            return res.status(404).json({ success: false, message: 'Movie not found' });
+        }
+
+        // Delete related data (order matters due to foreign keys)
+        // Delete movie genres
+        await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .query('DELETE FROM Movie_Genres WHERE movie_id = @MovieId');
+
+        // Delete movie cast
+        await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .query('DELETE FROM Movie_Cast WHERE movie_id = @MovieId');
+
+        // Delete reviews
+        await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .query('DELETE FROM Reviews WHERE movie_id = @MovieId');
+
+        // Delete watchlist entries
+        await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .query('DELETE FROM Watchlist WHERE movie_id = @MovieId');
+
+        // Delete from collections
+        await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .query('DELETE FROM Collection_Movies WHERE movie_id = @MovieId');
+
+        // Delete the movie itself
+        await new sql.Request()
+            .input('MovieId', sql.Int, movieId)
+            .query('DELETE FROM Movies WHERE movie_id = @MovieId');
+
+        res.json({
+            success: true,
+            message: 'Movie deleted successfully'
+        });
+    } catch (err) {
+        console.error('✗ Delete movie error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+};
+
+module.exports = { getMovies, getBrowseMovies, getMovieById, getGenres, addMovie, updateMovie, deleteMovie };

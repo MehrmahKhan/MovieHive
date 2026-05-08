@@ -18,4 +18,17 @@ router.put('/:reviewId', reviewsController.updateReview);
 // DELETE review
 router.delete('/:reviewId', reviewsController.deleteReview);
 
+// ADMIN ROUTES
+// GET all reviews for admin management
+router.get('/admin/all', reviewsController.getAllReviewsAdmin);
+
+// PUT flag review as inappropriate (admin only)
+router.put('/admin/flag/:reviewId', reviewsController.flagReview);
+
+// PUT unflag review (admin only)
+router.put('/admin/unflag/:reviewId', reviewsController.unflagReview);
+
+// DELETE review (admin only)
+router.delete('/admin/:reviewId', reviewsController.adminDeleteReview);
+
 module.exports = router;

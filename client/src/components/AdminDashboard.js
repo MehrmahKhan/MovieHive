@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import AddMovieForm from './AddMovieForm';
 import AdminUserManagement from './AdminUserManagement';
+import AdminMovieManagement from './AdminMovieManagement';
+import AdminReviewManagement from './AdminReviewManagement';
 
 export default function AdminDashboard({user, onLogout}) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showAddMovieForm, setShowAddMovieForm] = useState(false);
     const [showUserManagement, setShowUserManagement] = useState(false);
+    const [showMovieManagement, setShowMovieManagement] = useState(false);
+    const [showReviewManagement, setShowReviewManagement] = useState(false);
 
     return (
         <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
@@ -91,7 +95,7 @@ export default function AdminDashboard({user, onLogout}) {
             {/* Admin Actions */}
             <section className="max-w-7xl mx-auto px-8 py-12" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
                 <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Admin Actions</h3>
-                <div className="grid sm:grid-cols-2 gap-6">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <button onClick={() => setShowUserManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
                         <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Manage Users</h4>
                         <p className="text-sm" style={{color: '#afafba'}}>View, edit, or remove user accounts and permissions</p>
@@ -99,6 +103,14 @@ export default function AdminDashboard({user, onLogout}) {
                     <button onClick={() => setShowAddMovieForm(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
                         <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Add Movie</h4>
                         <p className="text-sm" style={{color: '#afafba'}}>Add new movies to the database with genres and details</p>
+                    </button>
+                    <button onClick={() => setShowMovieManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Edit/Delete Movies</h4>
+                        <p className="text-sm" style={{color: '#afafba'}}>Update or remove existing movies and their details</p>
+                    </button>
+                    <button onClick={() => setShowReviewManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Manage Reviews</h4>
+                        <p className="text-sm" style={{color: '#afafba'}}>Flag, unflag, or delete inappropriate reviews</p>
                     </button>
                     <button className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
                         <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>View Reports</h4>
@@ -132,6 +144,20 @@ export default function AdminDashboard({user, onLogout}) {
                 <AdminUserManagement
                     adminUser={user}
                     onClose={() => setShowUserManagement(false)}
+                />
+            )}
+
+            {showMovieManagement && (
+                <AdminMovieManagement
+                    adminUser={user}
+                    onClose={() => setShowMovieManagement(false)}
+                />
+            )}
+
+            {showReviewManagement && (
+                <AdminReviewManagement
+                    adminUser={user}
+                    onClose={() => setShowReviewManagement(false)}
                 />
             )}
         </div>

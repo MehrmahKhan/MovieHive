@@ -634,6 +634,31 @@ INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (19, 20, 'Maximus
 INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (20, 21, 'Chris');
 GO
 
+-- Add crew members (Directors, Producers, etc.)
+SET IDENTITY_INSERT Persons ON;
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (22, 'Christopher Nolan', '1970-07-30');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (23, 'James Cameron', '1954-08-16');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (24, 'Steven Spielberg', '1946-12-18');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (25, 'Denis Villeneuve', '1967-10-03');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (26, 'Martin Scorsese', '1942-11-17');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (27, 'Quentin Tarantino', '1963-03-27');
+INSERT INTO Persons (person_id, full_name, birth_date) VALUES (28, 'Frank Darabont', '1959-01-28');
+SET IDENTITY_INSERT Persons OFF;
+GO
+
+-- Link crew to movies
+-- Directors
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (1, 22, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (2, 22, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (3, 25, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (7, 24, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (9, 23, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (10, 23, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (12, 24, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (19, 26, 'Director');
+INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (4, 28, 'Director');
+GO
+
 -- ============================================
 -- TEST USERS (for demo)
 -- ============================================

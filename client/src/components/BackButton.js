@@ -8,18 +8,17 @@ export default function BackButton({ label = 'Back', to, sticky = true }) {
   const handleClick = () => {
     if (to) return navigate(to);
 
-    // If the label suggests going back to movies, send user to homepage
+
     if (String(label).toLowerCase().includes('movies')) {
       return navigate('/');
     }
 
-    // If navigation state includes a logical origin, try to respect it
+
     const from = location.state && location.state.from;
     if (from === 'watchlist') {
       return navigate(-1);
     }
 
-    // Fallback: go back in history
     navigate(-1);
   };
 

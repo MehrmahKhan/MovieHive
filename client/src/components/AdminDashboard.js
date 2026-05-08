@@ -134,7 +134,7 @@ export default function AdminDashboard({user, onLogout}) {
             {showAddMovieForm && (
                 <AddMovieForm
                     onMovieAdded={() => {
-                        // Optional: refresh movie list or show success message
+                        // 
                     }}
                     onClose={() => setShowAddMovieForm(false)}
                 />

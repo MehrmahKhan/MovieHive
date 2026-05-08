@@ -15,7 +15,7 @@ const ChatWindow = ({ currentUser }) => {
     const messagesEndRef = useRef(null);
     const pollIntervalRef = useRef(null);
 
-    // Redirect if not logged in and restore user from localStorage
+
     useEffect(() => {
         if (!currentUser) {
             const storedUser = localStorage.getItem('user');
@@ -30,7 +30,6 @@ const ChatWindow = ({ currentUser }) => {
         }
     }, [currentUser, navigate]);
 
-    // Get friend name from location state or fetch it
     useEffect(() => {
         const state = window.history.state?.usr;
         if (state?.friendName) {

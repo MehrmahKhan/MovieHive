@@ -47,7 +47,7 @@ sql.connect(dbConfig)
         dbConnected = true;
         console.log("Connected to MovieDB");
         
-        // Initialize database schema (create forum tables if they don't exist)
+        // Initialize database schema (forum tables: debugging)
         try {
             await initializeDatabase();
         } catch (err) {

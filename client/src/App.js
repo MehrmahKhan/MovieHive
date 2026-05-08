@@ -11,6 +11,8 @@ import WatchlistPage from './components/WatchlistPage';
 import ProfilePage from './components/ProfilePage';
 import SettingsPage from './components/SettingsPage';
 import MyListsPage from './components/MyListsPage';
+import ForumPage from './components/ForumPage';
+import './components/MovieHiveTheme.css';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -58,6 +60,7 @@ function App() {
                     <>
                         <Route path="/" element={<AdminDashboard user={user} onLogout={handleLogout} />} />
                         <Route path="/movie/:movieId" element={<MovieDetailPage />} />
+                        <Route path="/forum" element={<ForumPage currentUser={user} />} />
                     </>
                 ) : (
                     <>
@@ -68,6 +71,7 @@ function App() {
                         <Route path="/profile" element={<ProfilePage currentUser={user} onUserUpdate={handleUserUpdate} />} />
                         <Route path="/settings" element={<SettingsPage currentUser={user} />} />
                         <Route path="/friends" element={<FriendsPage currentUser={user} />} />
+                        <Route path="/forum" element={<ForumPage currentUser={user} />} />
                         <Route path="/chat/:friendId" element={<ChatWindow currentUser={user} />} />
                     </>
                 )}

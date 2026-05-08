@@ -1,22 +1,22 @@
-const sql = require('mssql');
 require('dotenv').config();
 
-const dbConfig = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER,
-    database: process.env.DB_NAME,
-    port: parseInt(process.env.DB_PORT) || 1433,
-    options: { encrypt: true, trustServerCertificate: true }
-};
+const rawServer = process.env.DB_SERVER || 'localhost\\SQLEXPRESS';
+const serverParts = rawServer.split('\\').filter(Boolean);
+const dbHost = serverParts[0] || 'localhost';
+const dbInstance = serverParts[1];
+const dbPort = process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined;
 
-const connectDB = async () => {
-    try {
-        await sql.connect(dbConfig);
-        console.log('Connected to MovieHive DB');
-    } catch (err) {
-        console.error('DB Connection Error:', err);
+const dbConfig = {
+    user: process.env.DB_USER || 'sa',
+    password: process.env.DB_PASSWORD || '',
+    server: dbHost,
+    port: dbPort,
+    database: process.env.DB_NAME || 'MovieDB',
+    options: {
+        instanceName: dbPort ? undefined : dbInstance,
+        encrypt: true,
+        trustServerCertificate: true
     }
 };
 
-module.exports = { sql, connectDB };
+module.exports = dbConfig;

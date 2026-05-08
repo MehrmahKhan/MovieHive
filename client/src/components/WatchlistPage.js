@@ -58,29 +58,31 @@ export default function WatchlistPage() {
     if (!user) return <div>Loading...</div>;
 
     return (
-        <div style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
+        <div className="moviehive-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
             <Navbar user={user} onLogout={handleLogout} />
-            <div className="watchlist-container">
+            <div className="watchlist-container moviehive-shell">
                 <div style={{ marginBottom: 12 }}>
                     <BackButton label={'Back to Movies'} sticky={false} />
                 </div>
-                <h2>Your Watchlist</h2>
-                {movies.length === 0 ? (
-                    <div>No movies in your watchlist yet.</div>
-                ) : (
-                    <div className="watchlist-grid">
-                        {movies.map(m => (
-                            <div key={m.movie_id} className="watchlist-card">
-                                <h4 onClick={() => navigate(`/movie/${m.movie_id}`, { state: { from: 'watchlist' } })} className="watchlist-title">{m.title}</h4>
-                                <p className="watchlist-year">{m.release_year} · {m.duration_minutes}m</p>
-                                <div className="watchlist-actions">
-                                    <button onClick={() => navigate(`/movie/${m.movie_id}`, { state: { from: 'watchlist' } })}>View</button>
-                                    <button onClick={() => handleRemove(m.movie_id)}>Remove</button>
+                <div className="moviehive-panel">
+                    <h2>Your Watchlist</h2>
+                    {movies.length === 0 ? (
+                        <div className="moviehive-subtle">No movies in your watchlist yet.</div>
+                    ) : (
+                        <div className="watchlist-grid">
+                            {movies.map(m => (
+                                <div key={m.movie_id} className="watchlist-card">
+                                    <h4 onClick={() => navigate(`/movie/${m.movie_id}`, { state: { from: 'watchlist' } })} className="watchlist-title">{m.title}</h4>
+                                    <p className="watchlist-year">{m.release_year} · {m.duration_minutes}m</p>
+                                    <div className="watchlist-actions">
+                                        <button onClick={() => navigate(`/movie/${m.movie_id}`, { state: { from: 'watchlist' } })}>View</button>
+                                        <button onClick={() => handleRemove(m.movie_id)}>Remove</button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -135,19 +135,16 @@ const ChatWindow = ({ currentUser }) => {
     return (
         <>
         <Navbar user={user} onLogout={handleLogout} />
-        <div className="chat-window">
+        <div className="chat-window moviehive-page">
             <div className="chat-container">
-                {/* Header */}
                 <div className="chat-header">
                     <button className="back-button" onClick={handleGoBack}>Back</button>
                     <h2>{friendName || 'Chat'}</h2>
                     <div className="header-spacer"></div>
                 </div>
 
-                {/* Error Message */}
                 {error && <div className="message error-message">{error}</div>}
 
-                {/* Messages Area */}
                 <div className="messages-area">
                     {messages.length === 0 ? (
                         <div className="empty-chat">

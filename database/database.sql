@@ -116,6 +116,42 @@ CREATE TABLE Collection_Shares (
     FOREIGN KEY (shared_by_user_id) REFERENCES Users(user_id) ON DELETE NO ACTION
 );
 
+-- Forum_Categories: Discussion areas for community posts
+CREATE TABLE Forum_Categories (
+    category_id INT PRIMARY KEY IDENTITY(1,1),
+    category_name VARCHAR(120) NOT NULL UNIQUE,
+    description VARCHAR(300),
+    sort_order INT NOT NULL DEFAULT 0
+);
+
+-- Forum_Threads: Top-level discussion threads
+CREATE TABLE Forum_Threads (
+    thread_id INT PRIMARY KEY IDENTITY(1,1),
+    category_id INT NOT NULL,
+    user_id INT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    body VARCHAR(4000) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    reply_count INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (category_id) REFERENCES Forum_Categories(category_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE NO ACTION
+);
+
+-- Forum_Replies: Replies within discussion threads
+CREATE TABLE Forum_Replies (
+    reply_id INT PRIMARY KEY IDENTITY(1,1),
+    thread_id INT NOT NULL,
+    user_id INT NOT NULL,
+    body VARCHAR(4000) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (thread_id) REFERENCES Forum_Threads(thread_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE NO ACTION
+);
+
+GO
+
 -- ============================================
 -- UNIQUE CORE FEATURE TABLES (SQL-RELATED)
 -- Mood-based watchlist cooldown recommendations

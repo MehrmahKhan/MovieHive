@@ -74,95 +74,93 @@ export default function Dashboard({user, onLogout}) {
             : 'Discover Movies';
 
     return (
-        <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
-            {/* Navbar */}
+        <div className="moviehive-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
             <Navbar user={user} onLogout={onLogout} activeBrowseSection={browseSection} onBrowseSectionChange={setBrowseSection} />
 
-            {/* Hero Section */}
-            <section className="max-w-7xl mx-auto px-8 py-16">
-                <div>
-                    <h2 className="text-5xl font-light leading-tight mb-4 tracking-tight" style={{color: '#f4d320'}}>MovieHive</h2>
-                    <p className="font-light" style={{color: '#afafba'}}>{sectionTitle}</p>
+            <section className="moviehive-shell">
+                <div className="moviehive-hero">
+                    <h2 className="text-5xl font-light leading-tight mb-4 tracking-tight moviehive-accent">MovieHive</h2>
+                    <p className="font-light moviehive-subtle">{sectionTitle}</p>
                 </div>
             </section>
 
-            {/* Search Section */}
-            <section className="max-w-7xl mx-auto px-8 py-8" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px', borderBottomColor: '#3b3c45', borderBottomWidth: '1px'}}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                        type="text"
-                        placeholder="Search movies by title..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="px-4 py-3 rounded-lg"
-                        disabled={browseSection !== 'discover'}
-                        style={{backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626'}}
-                    />
-                    <select
-                        value={selectedGenre}
-                        onChange={(e) => setSelectedGenre(e.target.value)}
-                        className="px-4 py-3 rounded-lg"
-                        disabled={browseSection !== 'discover'}
-                        style={{backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626'}}
-                    >
-                        <option value="">All Genres</option>
-                        {genres.map(g => (
-                            <option key={g.genre_id} value={g.genre_name}>{g.genre_name}</option>
-                        ))}
-                    </select>
-                </div>
-            </section>
-
-            {/* Movie Catalogue */}
-            <section className="max-w-7xl mx-auto px-8 py-12">
-                <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>
-                    {loading ? 'Loading...' : `${sectionTitle}: ${movies.length} movie${movies.length !== 1 ? 's' : ''}`}
-                </h3>
-
-                {errorMessage ? (
-                    <div style={{ textAlign: 'center', color: '#ffb4b4', marginBottom: 16 }}>{errorMessage}</div>
-                ) : null}
-                
-                {loading ? (
-                    <div style={{textAlign: 'center', color: '#afafba'}}>Loading movies...</div>
-                ) : movies.length === 0 ? (
-                    <div style={{textAlign: 'center', color: '#afafba'}}>
-                        {browseSection === 'discover'
-                            ? 'No movies found. Try different search terms or filters.'
-                            : `No movies available in ${sectionTitle} right now.`}
+            <section className="moviehive-shell pt-0">
+                <div className="moviehive-panel">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input
+                            type="text"
+                            placeholder="Search movies by title..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="px-4 py-3 rounded-lg"
+                            disabled={browseSection !== 'discover'}
+                            style={{ backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626' }}
+                        />
+                        <select
+                            value={selectedGenre}
+                            onChange={(e) => setSelectedGenre(e.target.value)}
+                            className="px-4 py-3 rounded-lg"
+                            disabled={browseSection !== 'discover'}
+                            style={{ backgroundColor: '#ececec', borderColor: '#3b3c45', borderWidth: '2px', color: '#262626' }}
+                        >
+                            <option value="">All Genres</option>
+                            {genres.map(g => (
+                                <option key={g.genre_id} value={g.genre_name}>{g.genre_name}</option>
+                            ))}
+                        </select>
                     </div>
-                ) : (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {movies.map((movie) => (
-                            <div 
-                                key={movie.movie_id} 
-                                onClick={() => navigate(`/movie/${movie.movie_id}`, { state: { from: 'home' } })}
-                                className="rounded-sm overflow-hidden transition hover:border-opacity-100 cursor-pointer hover:scale-105 hover:shadow-lg" 
-                                style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
-                                {/* Movie Header */}
-                                <div className="h-40 p-4 flex flex-col justify-between" style={{background: 'linear-gradient(to bottom right, #262626, #1d1f2b)'}}>
-                                    <div>
-                                        <h4 className="text-base font-light mb-2 line-clamp-2" style={{color: '#f4f4f4'}}>{movie.title}</h4>
-                                        <div className="flex flex-wrap gap-1">
-                                            {movie.genres && movie.genres.split(', ').map(g => <span key={g} className="text-xs px-2 py-1 rounded" style={{backgroundColor: 'rgba(59, 60, 69, 0.5)', color: '#c7c7cc'}}>{g}</span>)}
+                </div>
+            </section>
+
+            <section className="moviehive-shell pt-0 pb-12">
+                <div className="moviehive-panel">
+                    <h3 className="text-2xl font-light mb-8 tracking-tight moviehive-heading">
+                        {loading ? 'Loading...' : `${sectionTitle}: ${movies.length} movie${movies.length !== 1 ? 's' : ''}`}
+                    </h3>
+
+                    {errorMessage ? (
+                        <div style={{ textAlign: 'center', color: '#ffb4b4', marginBottom: 16 }}>{errorMessage}</div>
+                    ) : null}
+                    
+                    {loading ? (
+                        <div style={{textAlign: 'center', color: '#afafba'}}>Loading movies...</div>
+                    ) : movies.length === 0 ? (
+                        <div style={{textAlign: 'center', color: '#afafba'}}>
+                            {browseSection === 'discover'
+                                ? 'No movies found. Try different search terms or filters.'
+                                : `No movies available in ${sectionTitle} right now.`}
+                        </div>
+                    ) : (
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {movies.map((movie) => (
+                                <div 
+                                    key={movie.movie_id} 
+                                    onClick={() => navigate(`/movie/${movie.movie_id}`, { state: { from: 'home' } })}
+                                    className="rounded-sm overflow-hidden transition hover:border-opacity-100 cursor-pointer hover:scale-105 hover:shadow-lg" 
+                                    style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                                    <div className="h-40 p-4 flex flex-col justify-between" style={{background: 'linear-gradient(to bottom right, #262626, #1d1f2b)'}}>
+                                        <div>
+                                            <h4 className="text-base font-light mb-2 line-clamp-2" style={{color: '#f4f4f4'}}>{movie.title}</h4>
+                                            <div className="flex flex-wrap gap-1">
+                                                {movie.genres && movie.genres.split(', ').map(g => <span key={g} className="text-xs px-2 py-1 rounded" style={{backgroundColor: 'rgba(59, 60, 69, 0.5)', color: '#c7c7cc'}}>{g}</span>)}
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-light" style={{color: '#afafba'}}>{movie.release_year} · {movie.duration_minutes}m</span>
+                                            <span className="text-lg font-light" style={{color: '#f4d320'}}>{movie.avg_rating ? parseFloat(movie.avg_rating).toFixed(1) : 'N/A'}</span>
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm font-light" style={{color: '#afafba'}}>{movie.release_year} · {movie.duration_minutes}m</span>
-                                        <span className="text-lg font-light" style={{color: '#f4d320'}}>{movie.avg_rating ? parseFloat(movie.avg_rating).toFixed(1) : 'N/A'}</span>
+
+                                    <div className="p-4" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
+                                        <p className="text-xs font-light mb-2 uppercase tracking-widest" style={{color: '#595574'}}>Description</p>
+                                        <p className="text-sm font-light line-clamp-2" style={{color: '#c7c7cc'}}>{movie.description || 'No description available'}</p>
+                                        <p className="text-xs mt-3" style={{color: '#595574'}}>{movie.review_count} reviews</p>
                                     </div>
                                 </div>
-
-                                {/* Movie Info */}
-                                <div className="p-4" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
-                                    <p className="text-xs font-light mb-2 uppercase tracking-widest" style={{color: '#595574'}}>Description</p>
-                                    <p className="text-sm font-light line-clamp-2" style={{color: '#c7c7cc'}}>{movie.description || 'No description available'}</p>
-                                    <p className="text-xs mt-3" style={{color: '#595574'}}>{movie.review_count} reviews</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
+                </div>
             </section>
 
             {/* Footer */}

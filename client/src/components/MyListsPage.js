@@ -208,36 +208,40 @@ export default function MyListsPage() {
     return (
         <>
         <Navbar user={user} onLogout={handleLogout} />
-        <div className="min-h-screen text-white" style={{ background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)' }}>
+        <div className="moviehive-page" style={{ fontFamily: "'Poppins', sans-serif" }}>
             <div style={{ padding: 20 }}>
                 <BackButton label={'Back to Movies'} sticky={false} />
             </div>
 
-            <div className="max-w-7xl mx-auto px-8 py-4">
-                <h1 className="text-3xl font-light mb-4" style={{ color: '#f4d320' }}>My Lists</h1>
+            <div className="moviehive-shell">
+                <div className="moviehive-hero" style={{ marginBottom: 18 }}>
+                    <h1 className="text-3xl font-light mb-4 moviehive-accent">My Lists</h1>
+                </div>
 
-                <form onSubmit={createCollection} style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                    <input
-                        value={newCollectionName}
-                        onChange={(e) => setNewCollectionName(e.target.value)}
-                        placeholder="Create new list (e.g. Weekend Picks)"
-                        style={{ flex: 1, padding: '10px 12px', borderRadius: 6, background: '#ececec', color: '#262626' }}
-                    />
-                    <button type="submit" style={{ padding: '10px 14px', borderRadius: 6, background: '#f4d320', color: '#262626', fontWeight: 600 }}>
-                        Create
-                    </button>
-                </form>
+                <div className="moviehive-panel" style={{ marginBottom: 18 }}>
+                    <form onSubmit={createCollection} style={{ display: 'flex', gap: 8, marginBottom: 0 }}>
+                        <input
+                            value={newCollectionName}
+                            onChange={(e) => setNewCollectionName(e.target.value)}
+                            placeholder="Create new list (e.g. Weekend Picks)"
+                            style={{ flex: 1, padding: '10px 12px', borderRadius: 10, background: '#0b0f17', color: '#f4f4f4' }}
+                        />
+                        <button type="submit" style={{ padding: '10px 14px', borderRadius: 10, background: '#f4d320', color: '#262626', fontWeight: 700 }}>
+                            Create
+                        </button>
+                    </form>
+                </div>
 
                 {message ? <div style={{ color: '#ffd56d', marginBottom: 14 }}>{message}</div> : null}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16 }}>
-                    <div style={{ background: 'rgba(29,31,43,0.6)', border: '1px solid #3b3c45', borderRadius: 8, padding: 12 }}>
+                    <div className="moviehive-panel" style={{ padding: 12 }}>
                         <h3 style={{ marginBottom: 10, color: '#f4f4f4' }}>Your and Shared Lists</h3>
                         {collections.length === 0 ? (
-                            <div style={{ color: '#afafba' }}>No lists yet.</div>
+                            <div className="moviehive-subtle">No lists yet.</div>
                         ) : (
                             collections.map((c) => (
-                                <div key={c.collection_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 6px', borderRadius: 6, background: selectedCollection?.collection_id === c.collection_id ? 'rgba(244,211,32,0.12)' : 'transparent' }}>
+                                <div key={c.collection_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 6px', borderRadius: 12, background: selectedCollection?.collection_id === c.collection_id ? 'rgba(244,211,32,0.10)' : 'transparent' }}>
                                     <button onClick={() => setSelectedCollection(c)} style={{ textAlign: 'left', color: '#f4f4f4', flex: 1 }}>
                                         {c.collection_name} <span style={{ color: '#afafba' }}>({c.movie_count})</span>
                                         <div style={{ color: '#afafba', fontSize: 12 }}>
@@ -250,13 +254,13 @@ export default function MyListsPage() {
                         )}
                     </div>
 
-                    <div style={{ background: 'rgba(29,31,43,0.6)', border: '1px solid #3b3c45', borderRadius: 8, padding: 12 }}>
+                    <div className="moviehive-panel" style={{ padding: 12 }}>
                         <h3 style={{ marginBottom: 10, color: '#f4f4f4' }}>
                             {selectedCollection ? selectedCollection.collection_name : 'Select a list'}
                         </h3>
                         {selectedCollection?.is_owner ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                                <button onClick={() => openShareModal(selectedCollection)} style={{ padding: '6px 10px', borderRadius: 6, background: '#f4d320', color: '#262626', fontWeight: 600 }}>
+                                <button onClick={() => openShareModal(selectedCollection)} style={{ padding: '6px 10px', borderRadius: 10, background: '#f4d320', color: '#262626', fontWeight: 700 }}>
                                     Share List
                                 </button>
                                 <span style={{ color: '#afafba', fontSize: 13 }}>
@@ -265,7 +269,7 @@ export default function MyListsPage() {
                             </div>
                         ) : null}
                         {selectedCollection?.is_owner && collaborators.length > 0 ? (
-                            <div style={{ marginBottom: 14, border: '1px solid #3b3c45', borderRadius: 6, padding: 8 }}>
+                            <div style={{ marginBottom: 14, border: '1px solid rgba(244,211,32,0.12)', borderRadius: 12, padding: 8 }}>
                                 {collaborators.map((col) => (
                                     <div key={col.share_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
                                         <div style={{ color: '#e6e6e6', fontSize: 13 }}>{col.name} ({col.email})</div>
@@ -276,22 +280,22 @@ export default function MyListsPage() {
                         ) : null}
                         {selectedCollection ? (
                             movies.length === 0 ? (
-                                <div style={{ color: '#afafba' }}>No movies in this list yet.</div>
+                                <div className="moviehive-subtle">No movies in this list yet.</div>
                             ) : (
                                 <div style={{ display: 'grid', gap: 8 }}>
                                     {movies.map((m) => (
-                                        <div key={m.movie_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #3b3c45', borderRadius: 6, padding: 10 }}>
+                                        <div key={m.movie_id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid rgba(244,211,32,0.12)', borderRadius: 12, padding: 10, background: 'rgba(255,255,255,0.04)' }}>
                                             <button onClick={() => navigate(`/movie/${m.movie_id}`, { state: { from: 'lists' } })} style={{ color: '#f4f4f4', textAlign: 'left' }}>
                                                 <strong>{m.title}</strong>
                                                 <div style={{ color: '#afafba', fontSize: 13 }}>{m.release_year} · {m.duration_minutes} min</div>
                                             </button>
-                                                <button onClick={() => removeMovie(selectedCollection.collection_id, m.movie_id)} style={{ color: '#ffb4b4' }}>Remove</button>
+                                            <button onClick={() => removeMovie(selectedCollection.collection_id, m.movie_id)} style={{ color: '#ffb4b4' }}>Remove</button>
                                         </div>
                                     ))}
                                 </div>
                             )
                         ) : (
-                            <div style={{ color: '#afafba' }}>Choose a list from the left.</div>
+                            <div className="moviehive-subtle">Choose a list from the left.</div>
                         )}
                     </div>
                 </div>

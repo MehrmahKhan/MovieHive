@@ -174,19 +174,16 @@ const FriendsPage = ({ currentUser }) => {
     return (
         <>
         <Navbar user={user} onLogout={handleLogout} />
-        <div className="friends-page">
-            <div className="friends-container">
-                {/* Header */}
+        <div className="friends-page moviehive-page">
+            <div className="friends-container moviehive-shell">
                 <div className="friends-header">
                     <h1>Friends & Chat</h1>
                     <p>Manage your friends and chat with them</p>
                 </div>
 
-                {/* Messages */}
                 {error && <div className="message error-message">{error}</div>}
                 {success && <div className="message success-message">{success}</div>}
 
-                {/* Tabs */}
                 <div className="tabs">
                     <button
                         className={`tab ${activeTab === 'friends' ? 'active' : ''}`}
@@ -208,7 +205,6 @@ const FriendsPage = ({ currentUser }) => {
                     </button>
                 </div>
 
-                {/* Tab Content */}
                 <div className="tab-content">
                     {/* Friends Tab */}
                     {activeTab === 'friends' && (

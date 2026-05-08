@@ -101,6 +101,15 @@ export default function Navbar({ user, onLogout, activeBrowseSection, onBrowseSe
                                 >
                                     Friends
                                 </button>
+                                <button 
+                                    onClick={() => handleNavigation('/forum')} 
+                                    className="w-full text-left block px-4 py-2 text-sm transition font-light" 
+                                    style={{color: '#c7c7cc'}} 
+                                    onMouseEnter={(e) => e.target.style.backgroundColor = '#262626'} 
+                                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                                >
+                                    Forum
+                                </button>
                                 
                                 <div style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}></div>
                                 

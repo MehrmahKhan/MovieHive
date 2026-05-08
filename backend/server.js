@@ -10,6 +10,8 @@ const messagesRoutes = require('./routes/messagesRoutes');
 const watchlistRoutes = require('./routes/watchlistRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const collectionsRoutes = require('./routes/collectionsRoutes');
+const forumRoutes = require('./routes/forumRoutes');
+const initializeDatabase = require('./utils/initializeDatabase');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
@@ -40,9 +42,16 @@ const dbConfig = {
 
 // Connect to DB
 sql.connect(dbConfig)
-    .then(() => {
+    .then(async () => {
         dbConnected = true;
         console.log("Connected to MovieDB");
+        
+        // Initialize database schema (create forum tables if they don't exist)
+        try {
+            await initializeDatabase();
+        } catch (err) {
+            console.error('Database initialization error:', err.message);
+        }
     })
     .catch(err => {
         dbConnected = false;
@@ -72,6 +81,9 @@ app.use('/api/profile', profileRoutes);
 
 // Use collections routes
 app.use('/api/collections', collectionsRoutes);
+
+// Use forum routes
+app.use('/api/forum', forumRoutes);
 
 app.get('/', (_req, res) => {
     res.send('MovieHive backend is running. Use /api/health for status.');

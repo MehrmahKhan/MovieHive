@@ -1,6 +1,8 @@
-.watchlist-container { padding: 24px; color: #f4f4f4; }
-.watchlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 12px; }
-.watchlist-card { background: rgba(29,31,43,0.6); padding: 12px; border: 1px solid #3b3c45; border-radius: 6px; }
+.watchlist-container { max-width: 1280px; margin: 0 auto; padding: 28px 20px 48px; color: #f4f4f4; }
+.watchlist-container h2 { margin: 18px 0 10px; font-size: clamp(1.8rem, 2vw, 2.6rem); }
+.watchlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 16px; }
+.watchlist-card { background: rgba(11, 14, 22, 0.7); padding: 16px; border: 1px solid rgba(244, 211, 32, 0.14); border-radius: 16px; box-shadow: 0 18px 40px rgba(0,0,0,0.2); }
 .watchlist-title { cursor: pointer; color: #f4d320; }
-.watchlist-actions { display:flex; gap:8px; margin-top:8px; }
-.watchlist-actions button { padding:6px 10px; border-radius:4px; background:#262626; color:#c7c7cc; border:1px solid #3b3c45; }
+.watchlist-actions { display:flex; gap:10px; margin-top:12px; }
+.watchlist-actions button { padding:8px 12px; border-radius:10px; background: rgba(255,255,255,0.05); color:#f4f4f4; border:1px solid rgba(244,211,32,0.18); }
+.watchlist-year { color: rgba(244,244,244,0.65); }

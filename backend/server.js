@@ -1,4 +1,3 @@
-// backend/server.js
 const express = require('express');
 const cors = require('cors');
 const sql = require('mssql');
@@ -27,7 +26,6 @@ const dbHost = serverParts[0];
 const dbInstance = serverParts[1];
 const dbPort = process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined;
 
-// SQL Server config
 const dbConfig = {
     user: process.env.DB_USER || 'sa',
     password: process.env.DB_PASSWORD || '',
@@ -41,13 +39,11 @@ const dbConfig = {
     }
 };
 
-// Connect to DB
 sql.connect(dbConfig)
     .then(async () => {
         dbConnected = true;
         console.log("Connected to MovieDB");
         
-        // Initialize database schema (forum tables: debugging)
         try {
             await initializeDatabase();
         } catch (err) {
@@ -59,34 +55,24 @@ sql.connect(dbConfig)
         console.log('DB connection failed:', err.message);
     });
 
-// Use auth routes
 app.use("/api/auth", authRoutes);
 
-// Use movies routes
 app.use("/api/movies", moviesRoutes);
 
-// Use reviews routes
 app.use("/api/reviews", reviewsRoutes);
 
-// Use friends routes
 app.use("/api/friends", friendsRoutes);
 
-// Use messages routes
 app.use("/api/messages", messagesRoutes);
 
-// Use watchlist routes
 app.use('/api/watchlist', watchlistRoutes);
 
-// Use profile routes
 app.use('/api/profile', profileRoutes);
 
-// Use admin routes
 app.use('/api/admin', adminRoutes);
 
-// Use collections routes
 app.use('/api/collections', collectionsRoutes);
 
-// Use forum routes
 app.use('/api/forum', forumRoutes);
 
 app.get('/', (_req, res) => {
@@ -97,6 +83,5 @@ app.get('/api/health', (_req, res) => {
     res.json({ ok: true, api: 'MovieHive backend', dbConnected });
 });
 
-// Start server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

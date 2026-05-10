@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AddMovieForm from './AddMovieForm';
 import AdminUserManagement from './AdminUserManagement';
 import AdminMovieManagement from './AdminMovieManagement';
 import AdminReviewManagement from './AdminReviewManagement';
+import AdminReports from './AdminReports';
+import AdminForumManagement from './AdminForumManagement';
 
 export default function AdminDashboard({user, onLogout}) {
     const [showUserMenu, setShowUserMenu] = useState(false);
@@ -10,6 +12,53 @@ export default function AdminDashboard({user, onLogout}) {
     const [showUserManagement, setShowUserManagement] = useState(false);
     const [showMovieManagement, setShowMovieManagement] = useState(false);
     const [showReviewManagement, setShowReviewManagement] = useState(false);
+    const [showReports, setShowReports] = useState(false);
+    const [showForumManagement, setShowForumManagement] = useState(false);
+    const [activeTab, setActiveTab] = useState('overview');
+    const [overview, setOverview] = useState({
+        totalUsers: 0,
+        totalMovies: 0,
+        totalReviews: 0,
+        avgRating: '0.0'
+    });
+
+    useEffect(() => {
+        const adminId = user?.user_id ?? user?.id;
+
+        if (!adminId) {
+            return;
+        }
+
+        let isMounted = true;
+
+        const loadOverview = async () => {
+            try {
+                const response = await fetch(`http://localhost:3001/api/admin/summary?adminUserId=${adminId}`);
+                const data = await response.json();
+
+                if (!isMounted || !data.success) {
+                    return;
+                }
+
+                setOverview({
+                    totalUsers: data.summary?.totalUsers ?? 0,
+                    totalMovies: data.summary?.totalMovies ?? 0,
+                    totalReviews: data.summary?.totalReviews ?? 0,
+                    avgRating: data.summary?.avgRating ?? '0.0'
+                });
+            } catch (error) {
+                if (isMounted) {
+                    console.error('Failed to load system overview:', error);
+                }
+            }
+        };
+
+        loadOverview();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [user?.id, user?.user_id]);
 
     return (
         <div className="min-h-screen text-white" style={{background: 'linear-gradient(135deg, #1f2132 0%, #595574 100%)', fontFamily: "'Poppins', sans-serif"}}>
@@ -19,10 +68,29 @@ export default function AdminDashboard({user, onLogout}) {
                     <h1 className="text-2xl font-light tracking-tight">MovieHive <span style={{color: '#f4d320', fontSize: '0.7em'}}>ADMIN</span></h1>
 
                     <div className="flex items-center gap-8">
-                        <div className="hidden md:flex gap-8 text-sm font-light" style={{color: '#c7c7cc'}}>
-                            <button className="transition hover:text-white">Dashboard</button>
-                            <button className="transition hover:text-white">Users</button>
-                            <button className="transition hover:text-white">Reports</button>
+                        <div className="hidden md:flex gap-1 text-sm font-light">
+                            {[
+                                { id: 'overview', label: 'Overview' },
+                                { id: 'content', label: 'Content' },
+                                { id: 'community', label: 'Community' },
+                                { id: 'analytics', label: 'Analytics' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className="px-4 py-2 rounded-sm transition"
+                                    style={{
+                                        backgroundColor: activeTab === tab.id ? 'rgba(244, 211, 32, 0.15)' : 'transparent',
+                                        color: activeTab === tab.id ? '#f4d320' : '#c7c7cc',
+                                        borderColor: activeTab === tab.id ? '#f4d320' : 'transparent',
+                                        borderWidth: '1px'
+                                    }}
+                                    onMouseEnter={(e) => !activeTab.includes(tab.id) && (e.currentTarget.style.color = '#f4f4f4')}
+                                    onMouseLeave={(e) => !activeTab.includes(tab.id) && (e.currentTarget.style.color = '#c7c7cc')}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
                         </div>
 
                         <div className="relative">
@@ -65,62 +133,83 @@ export default function AdminDashboard({user, onLogout}) {
                 </div>
             </section>
 
-            {/* Admin Stats */}
+            {/* Admin Actions - Tab Based */}
             <section className="max-w-7xl mx-auto px-8 py-12" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
-                <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>System Overview</h3>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
-                        <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Total Users</p>
-                        <p className="text-3xl font-light" style={{color: '#f4d320'}}>127</p>
-                        <p className="text-xs mt-2" style={{color: '#afafba'}}>+5 this week</p>
+                {activeTab === 'overview' && (
+                    <div>
+                        <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>System Overview</h3>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                                <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Total Users</p>
+                                <p className="text-3xl font-light" style={{color: '#f4d320'}}>{overview.totalUsers}</p>
+                                <p className="text-xs mt-2" style={{color: '#afafba'}}>Registered accounts</p>
+                            </div>
+                            <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                                <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Total Movies</p>
+                                <p className="text-3xl font-light" style={{color: '#f4d320'}}>{overview.totalMovies}</p>
+                                <p className="text-xs mt-2" style={{color: '#afafba'}}>Movies in the catalogue</p>
+                            </div>
+                            <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                                <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Total Reviews</p>
+                                <p className="text-3xl font-light" style={{color: '#f4d320'}}>{overview.totalReviews}</p>
+                                <p className="text-xs mt-2" style={{color: '#afafba'}}>Reviews submitted by users</p>
+                            </div>
+                            <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
+                                <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Avg Rating</p>
+                                <p className="text-3xl font-light" style={{color: '#f4d320'}}>{overview.avgRating}</p>
+                                <p className="text-xs mt-2" style={{color: '#afafba'}}>Out of 5.0</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
-                        <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Total Movies</p>
-                        <p className="text-3xl font-light" style={{color: '#f4d320'}}>342</p>
-                        <p className="text-xs mt-2" style={{color: '#afafba'}}>+12 this week</p>
-                    </div>
-                    <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
-                        <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Total Reviews</p>
-                        <p className="text-3xl font-light" style={{color: '#f4d320'}}>856</p>
-                        <p className="text-xs mt-2" style={{color: '#afafba'}}>+43 this week</p>
-                    </div>
-                    <div className="p-6 rounded-sm" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}}>
-                        <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#595574'}}>Avg Rating</p>
-                        <p className="text-3xl font-light" style={{color: '#f4d320'}}>8.2</p>
-                        <p className="text-xs mt-2" style={{color: '#afafba'}}>Out of 10.0</p>
-                    </div>
-                </div>
-            </section>
+                )}
 
-            {/* Admin Actions */}
-            <section className="max-w-7xl mx-auto px-8 py-12" style={{borderTopColor: '#3b3c45', borderTopWidth: '1px'}}>
-                <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Admin Actions</h3>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <button onClick={() => setShowUserManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Manage Users</h4>
-                        <p className="text-sm" style={{color: '#afafba'}}>View, edit, or remove user accounts and permissions</p>
-                    </button>
-                    <button onClick={() => setShowAddMovieForm(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Add Movie</h4>
-                        <p className="text-sm" style={{color: '#afafba'}}>Add new movies to the database with genres and details</p>
-                    </button>
-                    <button onClick={() => setShowMovieManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Edit/Delete Movies</h4>
-                        <p className="text-sm" style={{color: '#afafba'}}>Update or remove existing movies and their details</p>
-                    </button>
-                    <button onClick={() => setShowReviewManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>Manage Reviews</h4>
-                        <p className="text-sm" style={{color: '#afafba'}}>Flag, unflag, or delete inappropriate reviews</p>
-                    </button>
-                    <button className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>View Reports</h4>
-                        <p className="text-sm" style={{color: '#afafba'}}>Analyze user activity, reviews, and system performance metrics</p>
-                    </button>
-                    <button className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
-                        <h4 className="font-light mb-2" style={{color: '#f4f4f4'}}>System Settings</h4>
-                        <p className="text-sm" style={{color: '#afafba'}}>Configure system-wide settings and database maintenance tasks</p>
-                    </button>
-                </div>
+                {activeTab === 'content' && (
+                    <div>
+                        <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Content Management</h3>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                            <button onClick={() => setShowAddMovieForm(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                                <h4 className="font-light mb-2 text-lg" style={{color: '#f4d320'}}>Add New Movie</h4>
+                                <p className="text-sm" style={{color: '#afafba'}}>Add new movies to the database with genres, descriptions, and release dates</p>
+                            </button>
+                            <button onClick={() => setShowMovieManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                                <h4 className="font-light mb-2 text-lg" style={{color: '#f4d320'}}>Edit/Delete Movies</h4>
+                                <p className="text-sm" style={{color: '#afafba'}}>Update movie details or remove titles from the catalogue</p>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'community' && (
+                    <div>
+                        <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Community Management</h3>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <button onClick={() => setShowUserManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                                <h4 className="font-light mb-2 text-lg" style={{color: '#f4d320'}}>Manage Users</h4>
+                                <p className="text-sm" style={{color: '#afafba'}}>View, edit, suspend or remove user accounts and set permissions</p>
+                            </button>
+                            <button onClick={() => setShowReviewManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                                <h4 className="font-light mb-2 text-lg" style={{color: '#f4d320'}}>Manage Reviews</h4>
+                                <p className="text-sm" style={{color: '#afafba'}}>Flag, unflag, or delete inappropriate reviews and comments</p>
+                            </button>
+                            <button onClick={() => setShowForumManagement(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                                <h4 className="font-light mb-2 text-lg" style={{color: '#f4d320'}}>Manage Forums</h4>
+                                <p className="text-sm" style={{color: '#afafba'}}>Manage categories, moderate threads and handle reports</p>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'analytics' && (
+                    <div>
+                        <h3 className="text-2xl font-light mb-8 tracking-tight" style={{color: '#f4f4f4'}}>Analytics & Reports</h3>
+                        <div className="grid sm:grid-cols-1 gap-6">
+                            <button onClick={() => setShowReports(true)} className="p-6 rounded-sm transition text-left" style={{backgroundColor: 'rgba(29, 31, 43, 0.5)', borderColor: '#3b3c45', borderWidth: '1px'}} onMouseEnter={(e) => e.currentTarget.style.borderColor = '#f4d320'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#3b3c45'}>
+                                <h4 className="font-light mb-2 text-lg" style={{color: '#f4d320'}}>View Reports</h4>
+                                <p className="text-sm" style={{color: '#afafba'}}>Analyze top-rated movies, flagged reviews, and user signup trends to understand platform activity</p>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </section>
 
             {/* Footer */}
@@ -158,6 +247,20 @@ export default function AdminDashboard({user, onLogout}) {
                 <AdminReviewManagement
                     adminUser={user}
                     onClose={() => setShowReviewManagement(false)}
+                />
+            )}
+
+            {showForumManagement && (
+                <AdminForumManagement
+                    adminUser={user}
+                    onClose={() => setShowForumManagement(false)}
+                />
+            )}
+
+            {showReports && (
+                <AdminReports
+                    adminUser={user}
+                    onClose={() => setShowReports(false)}
                 />
             )}
         </div>

@@ -1,4 +1,5 @@
 const sql = require('mssql');
+const config = require('../config/db');
 
 // GET all movies with filters
 const getMovies = async (req, res) => {
@@ -241,56 +242,6 @@ const addMovie = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Title, release year, and duration are required' });
         }
 
-        let movieId = null;
-
-        try {
-            const request = new sql.Request();
-            
-            // Insert movie with OUTPUT to get the ID
-            const movieResult = await request
-                .input('Title', sql.VarChar, title.trim())
-                .input('Description', sql.VarChar, description ? description.trim() : null)
-                .input('ReleaseYear', sql.Int, parseInt(release_year))
-                .input('DurationMinutes', sql.Int, parseInt(duration_minutes))
-                .input('IsUpcoming', sql.Bit, normalizedIsUpcoming ? 1 : 0)
-                .query(`
-                    DECLARE @InsertedIds TABLE (id INT);
-                    INSERT INTO Movies (title, description, release_year, duration_minutes, is_upcoming)
-                    OUTPUT INSERTED.movie_id INTO @InsertedIds
-                    VALUES (@Title, @Description, @ReleaseYear, @DurationMinutes, @IsUpcoming);
-                    SELECT id as movie_id FROM @InsertedIds;
-                `);
-
-            if (!movieResult.recordset || movieResult.recordset.length === 0) {
-                console.error('Movie insert failed - no ID returned');
-                return res.status(500).json({ success: false, message: 'Failed to insert movie' });
-            }
-
-            movieId = movieResult.recordset[0].movie_id;
-            console.log('[OK] Inserted movie with ID:', movieId);
-        } catch (insertErr) {
-            console.error('✗ Insert movie error:', insertErr.message);
-            throw insertErr;
-        }
-
-        // Link genres to movie
-        if (genreIds && Array.isArray(genreIds) && genreIds.length > 0) {
-            try {
-                for (const genreId of genreIds) {
-                    const genreRequest = new sql.Request();
-                    await genreRequest
-                        .input('MovieId', sql.Int, movieId)
-                        .input('GenreId', sql.Int, parseInt(genreId))
-                        .query('INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (@MovieId, @GenreId)');
-                }
-                console.log('[OK] Linked', genreIds.length, 'genres to movie', movieId);
-            } catch (genreErr) {
-                console.error('✗ Error linking genres:', genreErr.message);
-                // Don't throw - genre linking failure shouldn't fail the entire operation
-            }
-        }
-
-        // Link cast members to movie
         const normalizedCastMembers = Array.isArray(castMembers)
             ? castMembers
             : String(castMembers || '')
@@ -305,24 +256,63 @@ const addMovie = async (req, res) => {
                     };
                 });
 
-        if (normalizedCastMembers.length > 0) {
-            try {
+        let pool = null;
+        let transaction = null;
+        let movieId = null;
+
+        try {
+            pool = await sql.connect(config);
+            transaction = new sql.Transaction(pool);
+            await transaction.begin();
+
+            // Insert movie and get ID using transaction-scoped request
+            const trRequest = new sql.Request(transaction);
+            const movieResult = await trRequest
+                .input('Title', sql.VarChar, title.trim())
+                .input('Description', sql.VarChar, description ? description.trim() : null)
+                .input('ReleaseYear', sql.Int, parseInt(release_year))
+                .input('DurationMinutes', sql.Int, parseInt(duration_minutes))
+                .input('IsUpcoming', sql.Bit, normalizedIsUpcoming ? 1 : 0)
+                .query(`
+                    DECLARE @InsertedIds TABLE (id INT);
+                    INSERT INTO Movies (title, description, release_year, duration_minutes, is_upcoming)
+                    OUTPUT INSERTED.movie_id INTO @InsertedIds
+                    VALUES (@Title, @Description, @ReleaseYear, @DurationMinutes, @IsUpcoming);
+                    SELECT id as movie_id FROM @InsertedIds;
+                `);
+
+            if (!movieResult.recordset || movieResult.recordset.length === 0) {
+                throw new Error('Failed to insert movie');
+            }
+
+            movieId = movieResult.recordset[0].movie_id;
+
+            // Link genres
+            if (genreIds && Array.isArray(genreIds) && genreIds.length > 0) {
+                for (const genreId of genreIds) {
+                    await new sql.Request(transaction)
+                        .input('MovieId', sql.Int, movieId)
+                        .input('GenreId', sql.Int, parseInt(genreId))
+                        .query('INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (@MovieId, @GenreId)');
+                }
+            }
+
+            // Link cast members
+            if (normalizedCastMembers.length > 0) {
                 for (const member of normalizedCastMembers) {
                     const fullName = String(member.full_name || '').trim();
                     const roleName = String(member.role_name || 'Cast Member').trim() || 'Cast Member';
 
-                    if (!fullName) {
-                        continue;
-                    }
+                    if (!fullName) continue;
 
-                    const personLookup = await new sql.Request()
+                    const personLookup = await new sql.Request(transaction)
                         .input('FullName', sql.VarChar, fullName)
                         .query('SELECT person_id FROM Persons WHERE full_name = @FullName');
 
                     let personId = personLookup.recordset?.[0]?.person_id;
 
                     if (!personId) {
-                        const personResult = await new sql.Request()
+                        const personResult = await new sql.Request(transaction)
                             .input('FullName', sql.VarChar, fullName)
                             .query(`
                                 DECLARE @InsertedPeople TABLE (person_id INT);
@@ -335,18 +325,25 @@ const addMovie = async (req, res) => {
                     }
 
                     if (personId) {
-                        await new sql.Request()
+                        await new sql.Request(transaction)
                             .input('MovieId', sql.Int, movieId)
                             .input('PersonId', sql.Int, personId)
                             .input('RoleName', sql.VarChar, roleName)
                             .query('INSERT INTO Movie_Cast (movie_id, person_id, role_name) VALUES (@MovieId, @PersonId, @RoleName)');
                     }
                 }
-                console.log('[OK] Linked cast members to movie', movieId);
-            } catch (castErr) {
-                console.error('✗ Error linking cast members:', castErr.message);
-                // Don't throw - cast linking failure shouldn't fail the entire operation
             }
+
+            await transaction.commit();
+            console.log('[OK] Inserted movie with ID:', movieId);
+        } catch (txErr) {
+            console.error('Transaction error (addMovie):', txErr.message);
+            try {
+                if (transaction) await transaction.rollback();
+            } catch (rbErr) {
+                console.error('Rollback failed (addMovie):', rbErr.message);
+            }
+            return res.status(500).json({ success: false, message: 'Failed to add movie: ' + txErr.message });
         }
 
         res.json({
@@ -363,18 +360,21 @@ const addMovie = async (req, res) => {
             }
         });
     } catch (err) {
-        console.error('✗ Add movie error:', err.message);
+        console.error('Add movie error:', err.message);
         res.status(500).json({ success: false, message: 'Server error: ' + err.message });
     }
 };
 
-// PUT - Update existing movie (admin only)
 const updateMovie = async (req, res) => {
     try {
         const { movieId } = req.params;
-        const { adminUserId, title, description, release_year, duration_minutes, genreIds, isUpcoming } = req.body;
+        const { adminUserId: rawAdminUserId, title, description, release_year, duration_minutes, genreIds, isUpcoming } = req.body;
 
-        // Verify admin
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
         const admin = await new sql.Request()
             .input('adminUserId', sql.Int, adminUserId)
             .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
@@ -389,65 +389,82 @@ const updateMovie = async (req, res) => {
 
         const normalizedIsUpcoming = isUpcoming === true || isUpcoming === 'true' || isUpcoming === 1 || isUpcoming === '1';
 
-        // Update movie details
-        await new sql.Request()
-            .input('MovieId', sql.Int, movieId)
-            .input('Title', sql.VarChar, title.trim())
-            .input('Description', sql.VarChar, description ? description.trim() : null)
-            .input('ReleaseYear', sql.Int, parseInt(release_year))
-            .input('DurationMinutes', sql.Int, parseInt(duration_minutes))
-            .input('IsUpcoming', sql.Bit, normalizedIsUpcoming ? 1 : 0)
-            .query(`
-                UPDATE Movies
-                SET title = @Title,
-                    description = @Description,
-                    release_year = @ReleaseYear,
-                    duration_minutes = @DurationMinutes,
-                    is_upcoming = @IsUpcoming
-                WHERE movie_id = @MovieId
-            `);
+        let pool = null;
+        let transaction = null;
+        try {
+            pool = await sql.connect(config);
+            transaction = new sql.Transaction(pool);
+            await transaction.begin();
 
-        // Update genres if provided
-        if (genreIds && Array.isArray(genreIds) && genreIds.length > 0) {
-            // Delete existing genre links
-            await new sql.Request()
+            await new sql.Request(transaction)
                 .input('MovieId', sql.Int, movieId)
-                .query('DELETE FROM Movie_Genres WHERE movie_id = @MovieId');
+                .input('Title', sql.VarChar, title.trim())
+                .input('Description', sql.VarChar, description ? description.trim() : null)
+                .input('ReleaseYear', sql.Int, parseInt(release_year))
+                .input('DurationMinutes', sql.Int, parseInt(duration_minutes))
+                .input('IsUpcoming', sql.Bit, normalizedIsUpcoming ? 1 : 0)
+                .query(`
+                    UPDATE Movies
+                    SET title = @Title,
+                        description = @Description,
+                        release_year = @ReleaseYear,
+                        duration_minutes = @DurationMinutes,
+                        is_upcoming = @IsUpcoming
+                    WHERE movie_id = @MovieId
+                `);
 
-            // Insert new genre links
-            for (const genreId of genreIds) {
-                await new sql.Request()
+            if (genreIds && Array.isArray(genreIds) && genreIds.length > 0) {
+                await new sql.Request(transaction)
                     .input('MovieId', sql.Int, movieId)
-                    .input('GenreId', sql.Int, parseInt(genreId))
-                    .query('INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (@MovieId, @GenreId)');
-            }
-        }
+                    .query('DELETE FROM Movie_Genres WHERE movie_id = @MovieId');
 
-        res.json({
-            success: true,
-            message: 'Movie updated successfully',
-            movie: {
-                movie_id: movieId,
-                title,
-                description,
-                release_year,
-                duration_minutes,
-                is_upcoming: normalizedIsUpcoming
+                for (const genreId of genreIds) {
+                    await new sql.Request(transaction)
+                        .input('MovieId', sql.Int, movieId)
+                        .input('GenreId', sql.Int, parseInt(genreId))
+                        .query('INSERT INTO Movie_Genres (movie_id, genre_id) VALUES (@MovieId, @GenreId)');
+                }
             }
-        });
+
+            await transaction.commit();
+
+            res.json({
+                success: true,
+                message: 'Movie updated successfully',
+                movie: {
+                    movie_id: movieId,
+                    title,
+                    description,
+                    release_year,
+                    duration_minutes,
+                    is_upcoming: normalizedIsUpcoming
+                }
+            });
+        } catch (txErr) {
+            console.error('Transaction error (updateMovie):', txErr.message);
+            try {
+                if (transaction) await transaction.rollback();
+            } catch (rbErr) {
+                console.error('Rollback failed (updateMovie):', rbErr.message);
+            }
+            res.status(500).json({ success: false, message: 'Server error: ' + txErr.message });
+        }
     } catch (err) {
-        console.error('✗ Update movie error:', err.message);
+        console.error('Update movie error:', err.message);
         res.status(500).json({ success: false, message: 'Server error: ' + err.message });
     }
 };
 
-// DELETE - Delete movie (admin only)
 const deleteMovie = async (req, res) => {
     try {
         const { movieId } = req.params;
-        const { adminUserId } = req.query;
+        const rawAdminUserId = req.query.adminUserId;
 
-        // Verify admin
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
         const admin = await new sql.Request()
             .input('adminUserId', sql.Int, adminUserId)
             .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
@@ -460,7 +477,6 @@ const deleteMovie = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Movie ID is required' });
         }
 
-        // Check if movie exists
         const movie = await new sql.Request()
             .input('MovieId', sql.Int, movieId)
             .query('SELECT movie_id FROM Movies WHERE movie_id = @MovieId');
@@ -469,43 +485,54 @@ const deleteMovie = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Movie not found' });
         }
 
-        // Delete related data (order matters due to foreign keys)
-        // Delete movie genres
-        await new sql.Request()
-            .input('MovieId', sql.Int, movieId)
-            .query('DELETE FROM Movie_Genres WHERE movie_id = @MovieId');
+        let pool = null;
+        let transaction = null;
+        try {
+            pool = await sql.connect(config);
+            transaction = new sql.Transaction(pool);
+            await transaction.begin();
 
-        // Delete movie cast
-        await new sql.Request()
-            .input('MovieId', sql.Int, movieId)
-            .query('DELETE FROM Movie_Cast WHERE movie_id = @MovieId');
+            await new sql.Request(transaction)
+                .input('MovieId', sql.Int, movieId)
+                .query('DELETE FROM Movie_Genres WHERE movie_id = @MovieId');
 
-        // Delete reviews
-        await new sql.Request()
-            .input('MovieId', sql.Int, movieId)
-            .query('DELETE FROM Reviews WHERE movie_id = @MovieId');
+            await new sql.Request(transaction)
+                .input('MovieId', sql.Int, movieId)
+                .query('DELETE FROM Movie_Cast WHERE movie_id = @MovieId');
 
-        // Delete watchlist entries
-        await new sql.Request()
-            .input('MovieId', sql.Int, movieId)
-            .query('DELETE FROM Watchlist WHERE movie_id = @MovieId');
+            await new sql.Request(transaction)
+                .input('MovieId', sql.Int, movieId)
+                .query('DELETE FROM Reviews WHERE movie_id = @MovieId');
 
-        // Delete from collections
-        await new sql.Request()
-            .input('MovieId', sql.Int, movieId)
-            .query('DELETE FROM Collection_Movies WHERE movie_id = @MovieId');
+            await new sql.Request(transaction)
+                .input('MovieId', sql.Int, movieId)
+                .query('DELETE FROM Watchlist WHERE movie_id = @MovieId');
 
-        // Delete the movie itself
-        await new sql.Request()
-            .input('MovieId', sql.Int, movieId)
-            .query('DELETE FROM Movies WHERE movie_id = @MovieId');
+            await new sql.Request(transaction)
+                .input('MovieId', sql.Int, movieId)
+                .query('DELETE FROM Collection_Movies WHERE movie_id = @MovieId');
 
-        res.json({
-            success: true,
-            message: 'Movie deleted successfully'
-        });
+            await new sql.Request(transaction)
+                .input('MovieId', sql.Int, movieId)
+                .query('DELETE FROM Movies WHERE movie_id = @MovieId');
+
+            await transaction.commit();
+
+            res.json({
+                success: true,
+                message: 'Movie deleted successfully'
+            });
+        } catch (txErr) {
+            console.error('Transaction error (deleteMovie):', txErr.message);
+            try {
+                if (transaction) await transaction.rollback();
+            } catch (rbErr) {
+                console.error('Rollback failed (deleteMovie):', rbErr.message);
+            }
+            res.status(500).json({ success: false, message: 'Server error: ' + txErr.message });
+        }
     } catch (err) {
-        console.error('✗ Delete movie error:', err.message);
+        console.error('Delete movie error:', err.message);
         res.status(500).json({ success: false, message: 'Server error: ' + err.message });
     }
 };

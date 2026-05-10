@@ -5,7 +5,6 @@ const initializeDatabase = async () => {
     try {
         const pool = await sql.connect(config);
 
-        // Check if Forum_Categories table exists
         const result = await pool.request().query(`
             SELECT TABLE_NAME 
             FROM INFORMATION_SCHEMA.TABLES 
@@ -13,9 +12,9 @@ const initializeDatabase = async () => {
         `);
 
         if (result.recordset.length > 0) {
-            console.log('✓ Forum tables exist');
+            console.log('Forum tables exist');
         } else {
-            console.warn('⚠ Forum tables not found. Please run the SQL schema in SQL Server Management Studio.');
+            console.warn('Forum tables not found. Please run the SQL schema in SQL Server Management Studio.');
             console.warn('  See database/database.sql for forum table definitions.');
         }
     } catch (err) {

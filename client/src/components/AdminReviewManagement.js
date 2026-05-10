@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Flag, Trash2, Search } from 'lucide-react';
 
 export default function AdminReviewManagement({ adminUser, onClose }) {
+    const adminId = adminUser?.user_id ?? adminUser?.id;
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterFlagged, setFilterFlagged] = useState(false);
@@ -18,7 +19,7 @@ export default function AdminReviewManagement({ adminUser, onClose }) {
     const fetchReviews = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3001/api/reviews/admin/all?adminUserId=${adminUser.user_id}`);
+            const response = await fetch(`http://localhost:3001/api/reviews/admin/all?adminUserId=${adminId}`);
             const data = await response.json();
             setReviews(data.reviews || []);
         } catch (error) {
@@ -40,7 +41,7 @@ export default function AdminReviewManagement({ adminUser, onClose }) {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    adminUserId: adminUser.user_id,
+                    adminUserId: adminId,
                     reason: flagReason
                 })
             });
@@ -65,7 +66,7 @@ export default function AdminReviewManagement({ adminUser, onClose }) {
             const response = await fetch(`http://localhost:3001/api/reviews/admin/unflag/${reviewId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ adminUserId: adminUser.user_id })
+                body: JSON.stringify({ adminUserId: adminId })
             });
 
             const data = await response.json();
@@ -87,7 +88,7 @@ export default function AdminReviewManagement({ adminUser, onClose }) {
         }
 
         try {
-            const response = await fetch(`http://localhost:3001/api/reviews/admin/${reviewId}?adminUserId=${adminUser.user_id}`, {
+            const response = await fetch(`http://localhost:3001/api/reviews/admin/${reviewId}?adminUserId=${adminId}`, {
                 method: 'DELETE'
             });
 
@@ -172,7 +173,7 @@ export default function AdminReviewManagement({ adminUser, onClose }) {
                                                         style={{color: '#c5f4b5', backgroundColor: 'rgba(197,244,181,0.1)'}}
                                                         title="Unflag"
                                                     >
-                                                        ✓ Unflag
+                                                        Unflag
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteReview(review.review_id)}

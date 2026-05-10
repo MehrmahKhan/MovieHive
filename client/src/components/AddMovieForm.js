@@ -138,7 +138,7 @@ export default function AddMovieForm({ onMovieAdded, onClose }) {
                         className="text-2xl"
                         style={{color: '#afafba'}}
                     >
-                        ✕
+                        Close
                     </button>
                 </div>
 

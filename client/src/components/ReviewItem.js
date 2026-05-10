@@ -4,7 +4,6 @@ const ReviewItem = ({ review, currentUserId, onEdit, onDelete }) => {
   const isOwnReview = currentUserId && review.user_id === currentUserId;
   const sentimentClass = review.sentiment_score > 0 ? 'positive' : review.sentiment_score < 0 ? 'negative' : 'neutral';
 
-  // Format date
   const reviewDate = new Date(review.review_date);
   const formattedDate = reviewDate.toLocaleDateString('en-US', {
     year: 'numeric',
@@ -30,7 +29,7 @@ const ReviewItem = ({ review, currentUserId, onEdit, onDelete }) => {
                 key={i}
                 className={`rating-star ${i < review.rating ? 'filled' : 'empty'}`}
               >
-                ★
+                {i + 1}
               </span>
             ))}
             <span className="rating-number">{review.rating}/5</span>

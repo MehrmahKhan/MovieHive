@@ -243,7 +243,11 @@ const deleteReview = async (req, res) => {
 // Get all reviews for admin management
 const getAllReviewsAdmin = async (req, res) => {
     try {
-        const { adminUserId } = req.query;
+        const rawAdminUserId = req.query.adminUserId;
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
 
         // Verify admin
         const adminResult = await new sql.Request()
@@ -289,7 +293,12 @@ const getAllReviewsAdmin = async (req, res) => {
 const flagReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
-        const { adminUserId, reason } = req.body;
+        const { adminUserId: rawAdminUserId, reason } = req.body;
+
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
 
         // Verify admin
         const adminResult = await new sql.Request()
@@ -359,7 +368,12 @@ const flagReview = async (req, res) => {
 const unflagReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
-        const { adminUserId } = req.body;
+        const { adminUserId: rawAdminUserId } = req.body;
+
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
 
         // Verify admin
         const adminResult = await new sql.Request()
@@ -418,7 +432,11 @@ const unflagReview = async (req, res) => {
 const adminDeleteReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
-        const { adminUserId } = req.query;
+        const rawAdminUserId = req.query.adminUserId;
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
 
         // Verify admin
         const adminResult = await new sql.Request()

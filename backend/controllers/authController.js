@@ -97,7 +97,7 @@ router.post("/signup", async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Account created successfully 🎉 Welcome to MovieHive",
+      message: "Account created successfully. Welcome to MovieHive",
       user: {
         id: procResult.user_id,
         name: procResult.name,

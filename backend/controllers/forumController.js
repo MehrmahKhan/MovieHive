@@ -268,3 +268,119 @@ module.exports = {
     createForumThread,
     addForumReply
 };
+
+
+// Admin: delete a thread (admin-only)
+const adminDeleteThread = async (req, res) => {
+    try {
+        const { threadId } = req.params;
+        const rawAdminUserId = req.query.adminUserId;
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        // Verify admin
+        const adminResult = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!adminResult.recordset.length || adminResult.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        if (!threadId) {
+            return res.status(400).json({ success: false, message: 'Thread ID is required' });
+        }
+
+        const pool = await sql.connect(config);
+
+        // Ensure thread exists
+        const check = await pool.request()
+            .input('threadId', sql.Int, parseInt(threadId, 10))
+            .query('SELECT thread_id FROM Forum_Threads WHERE thread_id = @threadId');
+
+        if (!check.recordset.length) {
+            return res.status(404).json({ success: false, message: 'Thread not found' });
+        }
+
+        // Delete thread (replies cascade)
+        await pool.request()
+            .input('threadId', sql.Int, parseInt(threadId, 10))
+            .query('DELETE FROM Forum_Threads WHERE thread_id = @threadId');
+
+        res.json({ success: true, message: 'Thread deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting thread:', err);
+        res.status(500).json({ success: false, message: 'Failed to delete thread' });
+    }
+};
+
+// Admin: delete a reply (admin-only)
+const adminDeleteReply = async (req, res) => {
+    try {
+        const { replyId } = req.params;
+        const rawAdminUserId = req.query.adminUserId;
+        const adminUserId = parseInt(rawAdminUserId, 10);
+        if (Number.isNaN(adminUserId)) {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        // Verify admin
+        const adminResult = await new sql.Request()
+            .input('adminUserId', sql.Int, adminUserId)
+            .query('SELECT user_id, role FROM Users WHERE user_id = @adminUserId');
+
+        if (!adminResult.recordset.length || adminResult.recordset[0].role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Admin access required' });
+        }
+
+        if (!replyId) {
+            return res.status(400).json({ success: false, message: 'Reply ID is required' });
+        }
+
+        const pool = await sql.connect(config);
+
+        // Find thread id for reply
+        const find = await pool.request()
+            .input('replyId', sql.Int, parseInt(replyId, 10))
+            .query('SELECT thread_id FROM Forum_Replies WHERE reply_id = @replyId');
+
+        if (!find.recordset.length) {
+            return res.status(404).json({ success: false, message: 'Reply not found' });
+        }
+
+        const threadId = find.recordset[0].thread_id;
+
+        // Delete reply
+        await pool.request()
+            .input('replyId', sql.Int, parseInt(replyId, 10))
+            .query('DELETE FROM Forum_Replies WHERE reply_id = @replyId');
+
+        // Decrement reply_count safely
+        await pool.request()
+            .input('threadId', sql.Int, threadId)
+            .query(`
+                UPDATE Forum_Threads
+                SET reply_count = CASE WHEN reply_count > 0 THEN reply_count - 1 ELSE 0 END,
+                    updated_at = GETDATE()
+                WHERE thread_id = @threadId
+            `);
+
+        res.json({ success: true, message: 'Reply deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting reply:', err);
+        res.status(500).json({ success: false, message: 'Failed to delete reply' });
+    }
+};
+
+// expose admin functions
+module.exports = {
+    getForumCategories,
+    getForumThreads,
+    getForumThread,
+    createForumThread,
+    addForumReply,
+    adminDeleteThread,
+    adminDeleteReply
+};

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Edit2, Trash2, Search } from 'lucide-react';
 
 export default function AdminMovieManagement({ adminUser, onClose }) {
+    const adminId = adminUser?.user_id ?? adminUser?.id;
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -94,10 +95,10 @@ export default function AdminMovieManagement({ adminUser, onClose }) {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...editFormData,
-                    adminUserId: adminUser.user_id,
-                    genreIds: selectedGenres
-                })
+                        ...editFormData,
+                        adminUserId: adminId,
+                        genreIds: selectedGenres
+                    })
             });
 
             const data = await response.json();
@@ -130,7 +131,7 @@ export default function AdminMovieManagement({ adminUser, onClose }) {
             setError('');
             setMessage('');
 
-            const response = await fetch(`http://localhost:3001/api/movies/${movieId}?adminUserId=${adminUser.user_id}`, {
+            const response = await fetch(`http://localhost:3001/api/movies/${movieId}?adminUserId=${adminId}`, {
                 method: 'DELETE'
             });
 

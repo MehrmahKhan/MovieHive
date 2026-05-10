@@ -8,9 +8,8 @@ import './MovieDetailPage.css';
 import './ReviewStyles.css';
 import ListPickerModal from './ListPickerModal';
 
-// Icon components using Unicode symbols
 const ChevronLeft = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>‹</span>;
-const Star = ({ size = 20, className = '' }) => <span style={{fontSize: `${size}px`, lineHeight: 1}} className={className}>★</span>;
+const Star = ({ size = 20, className = '' }) => <span style={{fontSize: `${size}px`, lineHeight: 1}} className={className}>Rating</span>;
 const Clock = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>⏱</span>;
 const Calendar = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>●</span>;
 const Users = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>◉</span>;
@@ -28,7 +27,6 @@ const MovieDetailPage = () => {
   const [availableCollections, setAvailableCollections] = useState([]);
   const [listsMessage, setListsMessage] = useState('');
   
-  // Review states
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [userReview, setUserReview] = useState(null);
   const [reviewsRefresh, setReviewsRefresh] = useState(0);
@@ -52,14 +50,12 @@ const MovieDetailPage = () => {
       }
     };
 
-    // Get current user from localStorage
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setCurrentUser(user);
     }
 
-    // Check if in watchlist when user/movie available
     const checkWatchlistIfReady = async () => {
       const stored = localStorage.getItem('user');
       if (!stored) return;
@@ -82,7 +78,6 @@ const MovieDetailPage = () => {
     fetchMovieDetails();
   }, [movieId]);
 
-  // Fetch user's existing review for this movie
   useEffect(() => {
     if (!currentUser || !movieId) return;
 
@@ -111,7 +106,7 @@ const MovieDetailPage = () => {
     const user = JSON.parse(stored);
     if (!user?.id) return alert('User ID missing');
 
-    if (watchlistLoading) return; // avoid duplicate clicks
+    if (watchlistLoading) return;
     setWatchlistLoading(true);
 
     try {
@@ -269,7 +264,6 @@ const MovieDetailPage = () => {
     );
   }
 
-  // Parse genres string (from database STRING_AGG)
   const genres = movie.genres ? movie.genres.split(', ') : [];
   const avgRating = movie.avg_rating ? parseFloat(movie.avg_rating).toFixed(1) : 'N/A';
   const reviewCount = movie.review_count || 0;
@@ -289,18 +283,15 @@ const MovieDetailPage = () => {
     <>
     <Navbar user={currentUser} onLogout={handleLogout} />
     <div className="movie-detail-container">
-      {/* Back Button */}
       <div style={{ marginBottom: 12 }}>
         <BackButton label={'Back to Movies'} />
       </div>
 
-      {/* Hero Section */}
       <div className="movie-hero">
         <div className="hero-overlay" />
         <div className="hero-content">
           <h1 className="movie-title">{movie.title}</h1>
           
-          {/* Meta Info */}
           <div className="meta-info">
             <span className="year">
               <Calendar size={16} />
@@ -316,7 +307,6 @@ const MovieDetailPage = () => {
             </span>
           </div>
 
-          {/* Genres */}
           <div className="genres-list">
             {genres.map((genre, idx) => (
               <span key={idx} className="genre-badge">
@@ -325,7 +315,6 @@ const MovieDetailPage = () => {
             ))}
           </div>
 
-          {/* Action Buttons */}
           <div className="action-buttons">
             <button 
               onClick={handleWatchlist}
@@ -341,10 +330,6 @@ const MovieDetailPage = () => {
             >
               {listsLoading ? 'Adding to List...' : 'Add to List'}
             </button>
-            <button className="btn-rate">
-              <Star size={18} />
-              Rate Movie
-            </button>
           </div>
           {listsMessage ? <div style={{ color: '#ffd56d', marginTop: 8 }}>{listsMessage}</div> : null}
 
@@ -352,10 +337,8 @@ const MovieDetailPage = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="detail-content">
         <div className="content-main">
-          {/* Synopsis Section */}
           <section className="detail-section">
             <h2 className="section-title">Synopsis</h2>
             <p className="description">
@@ -363,18 +346,16 @@ const MovieDetailPage = () => {
             </p>
           </section>
 
-          {/* Cast & Crew Section */}
           <section className="detail-section">
             <h2 className="section-title">
               <Users size={20} />
               Cast & Crew
             </h2>
 
-            {/* Crew Section */}
             {crewMembers.length > 0 && (
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#f4d320', fontWeight: '600' }}>
-                  ☆ Crew
+                  Crew
                 </h3>
                 <div className="cast-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
                   {crewMembers.map((member) => (
@@ -395,7 +376,6 @@ const MovieDetailPage = () => {
               </div>
             )}
 
-            {/* Cast Section */}
             <div>
               <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#f4f4f4', fontWeight: '600' }}>
                 Cast
@@ -428,11 +408,9 @@ const MovieDetailPage = () => {
             </div>
           </section>
 
-          {/* Reviews Section */}
           <section className="detail-section">
             <h2 className="section-title">Reviews & Ratings</h2>
             
-            {/* Ratings Breakdown Card */}
             <div className="ratings-breakdown">
               <div className="avg-rating-large">
                 <div className="rating-number">{avgRating}</div>
@@ -448,7 +426,6 @@ const MovieDetailPage = () => {
                 <div className="rating-count">{displayedReviewCount} ratings</div>
               </div>
 
-              {/* Rating Distribution Bars */}
               <div className="rating-distribution">
                 {[5, 4, 3, 2, 1].map((stars) => {
                   const count = reviewTotals[stars - 1] || 0;
@@ -456,7 +433,7 @@ const MovieDetailPage = () => {
 
                   return (
                   <div key={stars} className="distribution-row">
-                    <span className="distribution-label">{stars}★</span>
+                    <span className="distribution-label">{stars}/5</span>
                     <div className="distribution-bar">
                       <div 
                         className="distribution-fill"
@@ -472,7 +449,6 @@ const MovieDetailPage = () => {
               </div>
             </div>
 
-            {/* Add Review Button */}
             {currentUser && !showReviewForm ? (
               <div className="review-add-section">
                 <button 
@@ -484,7 +460,6 @@ const MovieDetailPage = () => {
               </div>
             ) : null}
 
-            {/* Review Form */}
             {currentUser && showReviewForm && (
               <ReviewForm
                 movieId={parseInt(movieId)}
@@ -495,7 +470,6 @@ const MovieDetailPage = () => {
               />
             )}
 
-            {/* Reviews List */}
             {currentUser ? (
               <ReviewList
                 movieId={parseInt(movieId)}

@@ -7,7 +7,6 @@ const ReviewForm = ({ movieId, userId, onReviewSubmitted, existingReview = null,
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Validation
   const isValid = rating >= 1 && rating <= 5;
   const isEditing = !!existingReview;
 
@@ -45,7 +44,6 @@ const ReviewForm = ({ movieId, userId, onReviewSubmitted, existingReview = null,
       setRating(5);
       setReviewText('');
 
-      // Callback to refresh reviews
       setTimeout(() => onReviewSubmitted(data.review), 1500);
     } catch (err) {
       setError(err.message || 'Error submitting review');
@@ -72,7 +70,7 @@ const ReviewForm = ({ movieId, userId, onReviewSubmitted, existingReview = null,
               className={`star-button ${star <= rating ? 'filled' : 'empty'}`}
               title={`${star} star${star > 1 ? 's' : ''}`}
             >
-              ★
+              {star}
             </button>
           ))}
           <span className="rating-text">{rating}/5</span>

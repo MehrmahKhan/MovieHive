@@ -7,6 +7,7 @@ import ReviewList from './ReviewList';
 import './MovieDetailPage.css';
 import './ReviewStyles.css';
 import ListPickerModal from './ListPickerModal';
+import { useMovieImages } from '../hooks/useMovieImages';
 
 const ChevronLeft = ({ size = 20 }) => <span style={{fontSize: `${size}px`, lineHeight: 1}}>‹</span>;
 const Star = ({ size = 20, className = '' }) => <span style={{fontSize: `${size}px`, lineHeight: 1}} className={className}>Rating</span>;
@@ -32,6 +33,12 @@ const MovieDetailPage = () => {
   const [reviewsRefresh, setReviewsRefresh] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
   const [movieReviews, setMovieReviews] = useState([]);
+
+  // TMDB backdrop — fetched once movie is loaded
+  const { backdropUrl } = useMovieImages(
+    movie?.title ?? null,
+    movie?.release_year ?? null
+  );
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -287,7 +294,14 @@ const MovieDetailPage = () => {
         <BackButton label={'Back to Movies'} />
       </div>
 
-      <div className="movie-hero">
+      <div
+        className="movie-hero"
+        style={backdropUrl ? {
+          backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(15,15,15,0.85) 100%), url(${backdropUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+        } : {}}
+      >
         <div className="hero-overlay" />
         <div className="hero-content">
           <h1 className="movie-title">{movie.title}</h1>

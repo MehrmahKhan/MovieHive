@@ -7,7 +7,7 @@ import './WatchlistPage.css';
 export default function WatchlistPage() {
     const navigate = useNavigate();
     const [movies, setMovies] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [, setLoading] = useState(true);
     const [user, setUser] = useState(null);
 
     useEffect(() => {

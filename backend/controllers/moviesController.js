@@ -4,9 +4,10 @@ const config = require('../config/db');
 // GET all movies with filters
 const getMovies = async (req, res) => {
     try {
-        const { search, genre, minRating, maxRating, minYear, maxYear } = req.query;
+        const { search, genre, minRating, maxRating, minYear, maxYear, actor } = req.query;
+        
         let query = `
-            SELECT
+            SELECT DISTINCT
                 m.movie_id,
                 m.title,
                 m.description,
@@ -20,10 +21,17 @@ const getMovies = async (req, res) => {
             LEFT JOIN Reviews r ON r.movie_id = m.movie_id
             LEFT JOIN Movie_Genres mg ON mg.movie_id = m.movie_id
             LEFT JOIN Genres g ON g.genre_id = mg.genre_id
-            WHERE 1=1
         `;
 
         let params = [];
+
+        // Add actor JOINs if actor filter is present
+        if (actor && actor.trim()) {
+            query += ` INNER JOIN Movie_Cast mc ON mc.movie_id = m.movie_id
+                       INNER JOIN Persons p ON p.person_id = mc.person_id`;
+        }
+
+        query += ` WHERE 1=1`;
 
         if (search && search.trim()) {
             query += ` AND (m.title LIKE @search OR m.description LIKE @search)`;
@@ -43,6 +51,11 @@ const getMovies = async (req, res) => {
         if (maxYear) {
             query += ` AND m.release_year <= @maxYear`;
             params.push({ name: 'maxYear', value: parseInt(maxYear) });
+        }
+
+        if (actor && actor.trim()) {
+            query += ` AND p.full_name LIKE @actor`;
+            params.push({ name: 'actor', value: `%${actor}%` });
         }
 
         query += ` GROUP BY m.movie_id, m.title, m.description, m.release_year, m.duration_minutes, m.is_upcoming`;
